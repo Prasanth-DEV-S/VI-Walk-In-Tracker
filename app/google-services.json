@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "489057489411",
+    "project_id": "viwalkintracker",
+    "storage_bucket": "viwalkintracker.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:489057489411:android:c184c1730e23b2f31c3436",
+        "android_client_info": {
+          "package_name": "com.vi.teamconnect"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDbJQlGf5bFqTYbXNYNM4oB6F1AnLaksh0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
