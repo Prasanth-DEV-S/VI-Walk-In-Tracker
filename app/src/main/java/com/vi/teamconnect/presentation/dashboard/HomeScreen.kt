@@ -1,7 +1,10 @@
 package com.vi.teamconnect.presentation.dashboard
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -10,43 +13,50 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Call
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Group
-import androidx.compose.material.icons.filled.HourglassEmpty
-import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vi.teamconnect.domain.model.CustomerVisit
+import com.vi.teamconnect.presentation.components.GoldCard
+import com.vi.teamconnect.presentation.components.GoldEditCustomerDialog
 import com.vi.teamconnect.presentation.components.StatusChip
 import com.vi.teamconnect.presentation.components.VIHeader
-import com.vi.teamconnect.presentation.theme.ViPurpleHeader
-import com.vi.teamconnect.presentation.theme.ViRedPrimary
+import com.vi.teamconnect.presentation.theme.DarkCharcoal
+import com.vi.teamconnect.presentation.theme.DeepGold
+import com.vi.teamconnect.presentation.theme.GoldButtonGradient
+import com.vi.teamconnect.presentation.theme.LightGold
+import com.vi.teamconnect.presentation.theme.LightGoldBorder
+import com.vi.teamconnect.presentation.theme.PrimaryGold
+import com.vi.teamconnect.presentation.theme.SecondaryGrey
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun HomeScreen(
@@ -55,189 +65,253 @@ fun HomeScreen(
     onNavigateToCustomerDetail: (String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    var editingVisit by remember { mutableStateOf<CustomerVisit?>(null) }
+    val currentDateStr = SimpleDateFormat("EEEE, dd MMM yyyy", Locale.getDefault()).format(Date())
+
+    if (editingVisit != null) {
+        GoldEditCustomerDialog(
+            visit = editingVisit!!,
+            onDismiss = { editingVisit = null },
+            onSave = { updated ->
+                viewModel.updateCustomerVisit(updated)
+                editingVisit = null
+            }
+        )
+    }
 
     Scaffold(
         topBar = {
             VIHeader(
-                title = "VI Dashboard"
+                title = "Employee Dashboard"
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = onNavigateToAddCustomer,
-                containerColor = ViRedPrimary,
-                contentColor = Color.White
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(28.dp))
+                    .background(GoldButtonGradient)
+                    .clickable { onNavigateToAddCustomer() }
+                    .padding(horizontal = 20.dp, vertical = 14.dp)
             ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(Icons.Default.Add, contentDescription = "Add Customer")
-                    Spacer(modifier = Modifier.padding(start = 4.dp))
-                    Text("Add Customer", fontWeight = FontWeight.Bold)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Add Customer",
+                        tint = DarkCharcoal
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Add Customer",
+                        color = DarkCharcoal,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 15.sp
+                    )
                 }
             }
-        },
-        floatingActionButtonPosition = FabPosition.End
+        }
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
                 .padding(innerPadding),
             contentPadding = PaddingValues(16.dp)
         ) {
+            // Header Profile & Branch Card
             item {
-                Text(
-                    text = "Welcome, ${uiState.currentUser?.fullName ?: "Employee"}!",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = ViPurpleHeader
-                )
-                Text(
-                    text = "Role: ${uiState.currentUser?.role?.name ?: "EMPLOYEE"} | ID: ${uiState.currentUser?.employeeId ?: ""}",
-                    fontSize = 13.sp,
-                    color = Color.Gray,
-                    modifier = Modifier.padding(bottom = 16.dp)
-                )
-            }
+                GoldCard(modifier = Modifier.padding(bottom = 16.dp)) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column {
+                                Text(
+                                    text = "Welcome, ${uiState.currentUser?.employeeName?.ifEmpty { "Employee" } ?: "Employee"}",
+                                    fontSize = 20.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = DarkCharcoal
+                                )
+                                Text(
+                                    text = "ID: ${uiState.currentUser?.employeeId?.ifEmpty { "N/A" } ?: "N/A"}",
+                                    fontSize = 13.sp,
+                                    color = SecondaryGrey
+                                )
+                            }
+                            Text(
+                                text = currentDateStr,
+                                fontSize = 12.sp,
+                                color = DeepGold,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
 
-            // 6 Summary Cards
-            item {
-                Column {
-                    Text(
-                        text = "Dashboard Overview",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
+                        Spacer(modifier = Modifier.height(12.dp))
 
-                    val statsList = listOf(
-                        StatCardData("Total Records", uiState.stats.totalCustomerRecords.toString(), Icons.Default.Group, Color(0xFF1976D2)),
-                        StatCardData("Today's Visits", uiState.stats.todaysVisits.toString(), Icons.Default.DateRange, Color(0xFF388E3C)),
-                        StatCardData("Total CREs", uiState.stats.totalCres.toString(), Icons.Default.People, Color(0xFF7B1FA2)),
-                        StatCardData("Happy Calling - Yes", uiState.stats.happyCallingYes.toString(), Icons.Default.CheckCircle, Color(0xFF00796B)),
-                        StatCardData("Pending Follow-ups", uiState.stats.pendingFollowups.toString(), Icons.Default.HourglassEmpty, Color(0xFFE65100)),
-                        StatCardData("Monthly Records", uiState.stats.monthlyRecords.toString(), Icons.Default.Call, Color(0xFFC2185B))
-                    )
-
-                    LazyVerticalGrid(
-                        columns = GridCells.Fixed(2),
-                        verticalArrangement = Arrangement.spacedBy(10.dp),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(280.dp)
-                    ) {
-                        items(statsList) { card ->
-                            StatCardItem(card)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(LightGold.copy(alpha = 0.3f), shape = RoundedCornerShape(8.dp))
+                                .border(1.dp, LightGoldBorder, shape = RoundedCornerShape(8.dp))
+                                .padding(horizontal = 12.dp, vertical = 8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.LocationOn,
+                                contentDescription = "Branch",
+                                tint = DeepGold
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Branch: ${uiState.currentUser?.branchName?.ifEmpty { "Main Branch" } ?: "Main Branch"}",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = DarkCharcoal
+                            )
                         }
                     }
                 }
             }
 
+            // Quick Stats Summary
             item {
-                Spacer(modifier = Modifier.height(24.dp))
-                Text(
-                    text = "Recent Customer Visits",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.padding(bottom = 12.dp)
-                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    GoldStatSummaryCard(
+                        title = "Today's Visits",
+                        value = uiState.stats.todaysCustomerVisits.toString(),
+                        modifier = Modifier.weight(1f)
+                    )
+                    GoldStatSummaryCard(
+                        title = "Total Entries",
+                        value = uiState.stats.totalCustomerVisits.toString(),
+                        modifier = Modifier.weight(1f)
+                    )
+                }
             }
 
+            // Section Header
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "WALK-IN CUSTOMER DETAILS",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = DarkCharcoal
+                    )
+                }
+            }
+
+            // Customer Records List
             if (uiState.recentVisits.isEmpty()) {
                 item {
-                    Text(
-                        text = "No customer visits recorded yet.",
-                        color = Color.Gray,
-                        modifier = Modifier.padding(vertical = 16.dp)
-                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 32.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "No customer records found for this branch.",
+                            color = SecondaryGrey,
+                            fontSize = 14.sp
+                        )
+                    }
                 }
             } else {
                 items(uiState.recentVisits) { visit ->
-                    RecentCustomerCard(
+                    EmployeeCustomerCard(
                         visit = visit,
-                        onClick = { onNavigateToCustomerDetail(visit.recordId) }
+                        onClick = { onNavigateToCustomerDetail(visit.recordId) },
+                        onEditClick = { editingVisit = visit }
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
                 }
             }
         }
     }
 }
 
-data class StatCardData(
-    val title: String,
-    val value: String,
-    val icon: ImageVector,
-    val color: Color
-)
-
 @Composable
-fun StatCardItem(data: StatCardData) {
+fun GoldStatSummaryCard(
+    title: String,
+    value: String,
+    modifier: Modifier = Modifier
+) {
     Card(
+        modifier = modifier
+            .border(1.dp, LightGoldBorder, RoundedCornerShape(12.dp)),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = data.color.copy(alpha = 0.1f)),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column(
-            modifier = Modifier.padding(12.dp),
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(text = data.title, fontSize = 12.sp, color = Color.DarkGray, fontWeight = FontWeight.Medium)
-                Icon(imageVector = data.icon, contentDescription = null, tint = data.color)
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(text = data.value, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = data.color)
+        Column(modifier = Modifier.padding(14.dp)) {
+            Text(text = title, fontSize = 12.sp, color = SecondaryGrey, fontWeight = FontWeight.Medium)
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(text = value, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = DeepGold)
         }
     }
 }
 
 @Composable
-fun RecentCustomerCard(
+fun EmployeeCustomerCard(
     visit: CustomerVisit,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onEditClick: () -> Unit
 ) {
-    Card(
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-    ) {
+    GoldCard(modifier = Modifier.clickable(onClick = onClick)) {
         Column(modifier = Modifier.padding(14.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = visit.cusName, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                StatusChip(text = visit.prePp)
+                Column {
+                    Text(
+                        text = visit.customerName.ifEmpty { "Customer" },
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        color = DarkCharcoal
+                    )
+                    Text(
+                        text = "Mob: ${visit.mobileNumber}",
+                        fontSize = 13.sp,
+                        color = SecondaryGrey
+                    )
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    StatusChip(text = visit.prePost)
+                    IconButton(onClick = onEditClick) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = "Edit Customer",
+                            tint = DeepGold
+                        )
+                    }
+                }
             }
 
-            Spacer(modifier = Modifier.height(4.dp))
-
-            Text(text = "Mob: ${visit.mobNo} | CRE: ${visit.creName}", fontSize = 13.sp, color = Color.Gray)
-            Text(text = "Purpose: ${visit.purposeOfVisit} | Op: ${visit.operator}", fontSize = 13.sp, color = Color.DarkGray)
-
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(text = "Date: ${visit.date}", fontSize = 12.sp, color = Color.Gray)
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = "Happy Calling: ", fontSize = 12.sp, color = Color.Gray)
-                    StatusChip(text = visit.happyCalling)
+                Text(text = "Date: ${visit.date}", fontSize = 12.sp, color = SecondaryGrey)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(text = "GMB: ${visit.gmb}", fontSize = 12.sp, color = DeepGold, fontWeight = FontWeight.SemiBold)
+                    Text(text = "Tagging: ${visit.tagging}", fontSize = 12.sp, color = DeepGold, fontWeight = FontWeight.SemiBold)
                 }
             }
         }

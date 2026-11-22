@@ -1,5 +1,7 @@
 package com.vi.teamconnect.presentation.customer
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -42,9 +44,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vi.teamconnect.domain.model.Role
+import com.vi.teamconnect.presentation.components.DetailRow
+import com.vi.teamconnect.presentation.components.GoldCard
+import com.vi.teamconnect.presentation.components.GoldGradientButton
 import com.vi.teamconnect.presentation.components.StatusChip
 import com.vi.teamconnect.presentation.components.VIHeader
-import com.vi.teamconnect.presentation.theme.ViRedPrimary
+import com.vi.teamconnect.presentation.theme.DarkCharcoal
+import com.vi.teamconnect.presentation.theme.DeepGold
+import com.vi.teamconnect.presentation.theme.LightGoldBorder
+import com.vi.teamconnect.presentation.theme.PrimaryGold
+import com.vi.teamconnect.presentation.theme.SecondaryGrey
+import com.vi.teamconnect.presentation.theme.SoftGoldHighlight
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -75,11 +85,11 @@ fun CustomerDetailScreen(
                 actions = {
                     if (visit != null) {
                         IconButton(onClick = { onNavigateToEdit(visit.recordId) }) {
-                            Icon(Icons.Default.Edit, contentDescription = "Edit", tint = Color.White)
+                            Icon(Icons.Default.Edit, contentDescription = "Edit", tint = PrimaryGold)
                         }
                         if (isAdmin) {
                             IconButton(onClick = { showDeleteDialog = true }) {
-                                Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.White)
+                                Icon(Icons.Default.Delete, contentDescription = "Delete", tint = DeepGold)
                             }
                         }
                     }
@@ -91,24 +101,28 @@ fun CustomerDetailScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background)
                     .padding(innerPadding),
                 contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator()
+                CircularProgressIndicator(color = PrimaryGold)
             }
         } else {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background)
                     .padding(innerPadding)
                     .padding(16.dp)
                     .verticalScroll(rememberScrollState())
             ) {
                 // Header Card
                 Card(
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                    modifier = Modifier.fillMaxWidth()
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = SoftGoldHighlight),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(1.dp, LightGoldBorder, RoundedCornerShape(16.dp))
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Row(
@@ -116,60 +130,46 @@ fun CustomerDetailScreen(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(text = visit.cusName, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+                            Text(text = visit.cusName, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = DarkCharcoal)
                             StatusChip(text = visit.prePp)
                         }
                         Spacer(modifier = Modifier.height(4.dp))
-                        Text(text = "Token: ${visit.token}", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = ViRedPrimary)
-                        Text(text = "CRE: ${visit.creName} (ID: ${visit.creEmployeeId})", fontSize = 13.sp, color = Color.Gray)
+                        Text(text = "Token: ${visit.token}", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = DeepGold)
+                        Text(text = "CRE: ${visit.creName} (ID: ${visit.creEmployeeId})", fontSize = 13.sp, color = SecondaryGrey)
                     }
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Text("All 15 Business Fields", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                Text("All 15 Business Fields", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = DarkCharcoal)
                 Spacer(modifier = Modifier.height(8.dp))
 
-                Card(
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
+                GoldCard {
                     Column(modifier = Modifier.padding(16.dp)) {
                         DetailRow("1. DATE", visit.date)
-                        DetailRow("2. TOKEN", visit.token)
-                        DetailRow("3. CRE NAME", visit.creName)
-                        DetailRow("4. CUS NAME", visit.cusName)
-                        DetailRow("5. MOB NO", visit.mobNo)
-                        DetailRow("6. PURPOSE OF VISIT", visit.purposeOfVisit)
-                        DetailRow("7. PRE/PP", visit.prePp)
-                        DetailRow("8. ALTER NO", visit.alterNo.ifEmpty { "-" })
-                        DetailRow("9. SR NO", visit.srNo.ifEmpty { "-" })
-                        DetailRow("10. OPERATOR", visit.operator)
-                        DetailRow("11. GBP", visit.gbp.ifEmpty { "-" })
-                        DetailRow("12. Remarks", visit.remarks.ifEmpty { "No remarks" })
-                        DetailRow("13. Happy calling", visit.happyCalling)
-                        DetailRow("14. DID", visit.did.ifEmpty { "-" })
-                        DetailRow("15. Refferel", visit.refferel.ifEmpty { "-" })
+                        DetailRow("2. STORE NAME", visit.storeName.ifEmpty { "-" })
+                        DetailRow("3. BRANCH NAME", visit.branchName.ifEmpty { "-" })
+                        DetailRow("4. CRE NAME", visit.creName)
+                        DetailRow("5. CUS NAME", visit.customerName)
+                        DetailRow("6. MOB NO", visit.mobileNumber)
+                        DetailRow("7. REASON FOR VISIT", visit.reasonForVisit)
+                        DetailRow("8. PRE/POST", visit.prePost)
+                        DetailRow("9. ALTER NO", visit.altNumber.ifEmpty { "-" })
+                        DetailRow("10. GMB", visit.gmb)
+                        DetailRow("11. TAGGING", visit.tagging)
                     }
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Audit Details
-                Text("Metadata & Audit Details", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                Text("Metadata & Audit Details", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = DarkCharcoal)
                 Spacer(modifier = Modifier.height(8.dp))
 
                 val createdDateStr = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date(visit.createdAt))
                 val updatedDateStr = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date(visit.updatedAt))
 
-                Card(
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
+                GoldCard {
                     Column(modifier = Modifier.padding(16.dp)) {
                         DetailRow("Created At", createdDateStr)
                         DetailRow("Last Updated At", updatedDateStr)
@@ -183,20 +183,24 @@ fun CustomerDetailScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Button(
+                    GoldGradientButton(
+                        text = "EDIT RECORD",
                         onClick = { onNavigateToEdit(visit.recordId) },
-                        colors = ButtonDefaults.buttonColors(containerColor = ViRedPrimary),
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text("EDIT RECORD")
-                    }
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp)
+                    )
 
                     if (isAdmin) {
                         OutlinedButton(
                             onClick = { showDeleteDialog = true },
-                            modifier = Modifier.weight(1f)
+                            border = androidx.compose.foundation.BorderStroke(1.dp, DeepGold),
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(48.dp)
                         ) {
-                            Text("DELETE", color = Color.Red)
+                            Text("DELETE", color = DeepGold, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -208,38 +212,26 @@ fun CustomerDetailScreen(
         if (showDeleteDialog) {
             AlertDialog(
                 onDismissRequest = { showDeleteDialog = false },
-                title = { Text("Confirm Soft Delete") },
-                text = { Text("Are you sure you want to delete this customer record? Soft-deleted records are hidden from normal lists and can be recovered by Admin.") },
+                title = { Text("Confirm Soft Delete", color = DarkCharcoal, fontWeight = FontWeight.Bold) },
+                text = { Text("Are you sure you want to delete this customer record? Soft-deleted records are hidden from normal lists and can be recovered by Admin.", color = DarkCharcoal) },
                 confirmButton = {
                     Button(
                         onClick = {
                             showDeleteDialog = false
                             viewModel.deleteVisit()
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                        colors = ButtonDefaults.buttonColors(containerColor = DeepGold)
                     ) {
-                        Text("Delete")
+                        Text("Delete", color = Color.White)
                     }
                 },
                 dismissButton = {
                     TextButton(onClick = { showDeleteDialog = false }) {
-                        Text("Cancel")
+                        Text("Cancel", color = SecondaryGrey)
                     }
-                }
+                },
+                containerColor = MaterialTheme.colorScheme.surface
             )
         }
-    }
-}
-
-@Composable
-fun DetailRow(label: String, value: String) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 6.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(text = label, fontWeight = FontWeight.SemiBold, fontSize = 13.sp, color = Color.Gray, modifier = Modifier.weight(0.45f))
-        Text(text = value, fontWeight = FontWeight.Normal, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.weight(0.55f))
     }
 }

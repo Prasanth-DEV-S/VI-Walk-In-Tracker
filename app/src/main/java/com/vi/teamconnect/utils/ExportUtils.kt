@@ -12,21 +12,17 @@ import java.util.Locale
 object ExportUtils {
 
     private val HEADERS = listOf(
+        "STORE NAME",
+        "BRANCH NAME",
         "DATE",
-        "TOKEN",
         "CRE NAME",
-        "CUS NAME",
-        "MOB NO",
-        "PURPOSE OF VISIT",
-        "PRE/PP",
-        "ALTER NO",
-        "SR NO",
-        "OPERATOR",
-        "GBP",
-        "Remarks",
-        "Happy calling",
-        "DID",
-        "Refferel"
+        "CUSTOMER NAME",
+        "MOB NUMBER",
+        "PRE/POST",
+        "ALT NUMBER",
+        "REASON FOR VISIT",
+        "GMB",
+        "TAGGING"
     )
 
     fun generateCsvContent(visits: List<CustomerVisit>): String {
@@ -35,21 +31,17 @@ object ExportUtils {
 
         for (visit in visits) {
             val row = listOf(
+                escapeCsv(visit.storeName),
+                escapeCsv(visit.branchName),
                 escapeCsv(visit.date),
-                escapeCsv(visit.token),
                 escapeCsv(visit.creName),
-                escapeCsv(visit.cusName),
-                escapeCsv(visit.mobNo),
-                escapeCsv(visit.purposeOfVisit),
-                escapeCsv(visit.prePp),
-                escapeCsv(visit.alterNo),
-                escapeCsv(visit.srNo),
-                escapeCsv(visit.operator),
-                escapeCsv(visit.gbp),
-                escapeCsv(visit.remarks),
-                escapeCsv(visit.happyCalling),
-                escapeCsv(visit.did),
-                escapeCsv(visit.refferel)
+                escapeCsv(visit.customerName),
+                escapeCsv(visit.mobileNumber),
+                escapeCsv(visit.prePost),
+                escapeCsv(visit.altNumber),
+                escapeCsv(visit.reasonForVisit),
+                escapeCsv(visit.gmb),
+                escapeCsv(visit.tagging)
             )
             sb.append(row.joinToString(",")).append("\n")
         }

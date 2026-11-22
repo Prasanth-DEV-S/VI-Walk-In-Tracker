@@ -1,51 +1,56 @@
 package com.vi.teamconnect.domain.model
 
 /**
- * CustomerVisit domain model representing all 15 business fields from the customer visit register,
- * along with necessary internal metadata for auditing and soft-deletion.
+ * CustomerVisit domain model representing walk-in customer records in Firestore.
  *
  * Business Fields:
- * 1. DATE (date)
- * 2. TOKEN (token)
- * 3. CRE NAME (creName)
- * 4. CUS NAME (cusName)
- * 5. MOB NO (mobNo)
- * 6. PURPOSE OF VISIT (purposeOfVisit)
- * 7. PRE/PP (prePp)
- * 8. ALTER NO (alterNo)
- * 9. SR NO (srNo)
- * 10. OPERATOR (operator)
- * 11. GBP (gbp)
- * 12. Remarks (remarks)
- * 13. Happy calling (happyCalling)
- * 14. DID (did)
- * 15. Refferel (refferel)
+ * 1. StoreName / storeId / storeName
+ * 2. Date (YYYY-MM-DD)
+ * 3. CRE Name / creUid / creName
+ * 4. CUSTOMER NAME (customerName)
+ * 5. MOB NUMBER (mobileNumber)
+ * 6. PRE/POST (prePost: "PREPAID" / "POSTPAID")
+ * 7. ALT NUMBER (altNumber)
+ * 8. REASON FOR VISIT (reasonForVisit)
+ * 9. GMB ("YES" / "NO")
+ * 10. TAGGING ("YES" / "NO")
  */
 data class CustomerVisit(
     val recordId: String = "",
-    val date: String = "", // YYYY-MM-DD
-    val token: String = "",
+    val storeId: String = "",
+    val storeName: String = "",
+    val branchId: String = "",
+    val branchName: String = "",
+    val date: String = "",
+    val creUid: String = "",
     val creName: String = "",
-    val creEmployeeId: String = "",
-    val cusName: String = "",
-    val mobNo: String = "",
-    val purposeOfVisit: String = "",
-    val prePp: String = "PRE", // PRE / PP
-    val alterNo: String = "",
-    val srNo: String = "",
-    val operator: String = "Vi", // Vi, Airtel, Jio, BSNL, Other
-    val gbp: String = "",
-    val remarks: String = "",
-    val happyCalling: String = "Pending", // Yes, No, Pending, Not Applicable
-    val did: String = "",
-    val refferel: String = "",
+    val customerName: String = "",
+    val mobileNumber: String = "",
+    val prePost: String = "PREPAID", // PREPAID / POSTPAID
+    val altNumber: String = "",
+    val reasonForVisit: String = "",
+    val gmb: String = "NO", // YES / NO
+    val tagging: String = "NO", // YES / NO
 
-    // Audit Metadata
+    // Metadata
     val createdBy: String = "",
     val createdAt: Long = System.currentTimeMillis(),
     val updatedBy: String = "",
     val updatedAt: Long = System.currentTimeMillis(),
-    val isDeleted: Boolean = false,
-    val deletedBy: String? = null,
-    val deletedAt: Long? = null
-)
+    val isDeleted: Boolean = false
+) {
+    // Aliases for legacy code compatibility
+    val cusName: String get() = customerName
+    val mobNo: String get() = mobileNumber
+    val prePp: String get() = if (prePost.equals("POSTPAID", ignoreCase = true)) "PP" else "PRE"
+    val alterNo: String get() = altNumber
+    val purposeOfVisit: String get() = reasonForVisit
+    val creEmployeeId: String get() = creUid
+    val token: String get() = recordId.takeLast(8)
+    val operator: String get() = "Vi"
+    val gbp: String get() = gmb
+    val remarks: String get() = reasonForVisit
+    val happyCalling: String get() = "N/A"
+    val did: String get() = ""
+    val refferel: String get() = ""
+}

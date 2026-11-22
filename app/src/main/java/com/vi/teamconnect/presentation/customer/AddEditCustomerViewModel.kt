@@ -24,15 +24,20 @@ data class AddEditCustomerUiState(
     val recordId: String? = null,
     val isEditMode: Boolean = false,
 
-    // 15 Business Fields
+    // Fields
     val date: String = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date()),
     val token: String = "",
+    val storeId: String = "",
+    val storeName: String = "",
+    val branchId: String = "",
+    val branchName: String = "",
     val creName: String = "",
+    val creUid: String = "",
     val creEmployeeId: String = "",
     val cusName: String = "",
     val mobNo: String = "",
     val purposeOfVisit: String = "SIM Swap",
-    val prePp: String = "PRE",
+    val prePp: String = "PREPAID",
     val alterNo: String = "",
     val srNo: String = "",
     val operator: String = "Vi",
@@ -41,6 +46,8 @@ data class AddEditCustomerUiState(
     val happyCalling: String = "Pending",
     val did: String = "",
     val refferel: String = "Self",
+    val gmb: String = "NO",
+    val tagging: String = "NO",
 
     // Dropdown Options
     val settings: AppSettings = AppSettings(),
@@ -82,8 +89,11 @@ class AddEditCustomerViewModel @Inject constructor(
             if (user != null && !_uiState.value.isEditMode) {
                 _uiState.update {
                     it.copy(
-                        creName = user.fullName,
+                        creName = user.employeeName,
+                        creUid = user.employeeUid,
                         creEmployeeId = user.employeeId,
+                        branchId = user.branchId,
+                        branchName = user.branchName,
                         token = token
                     )
                 }
@@ -101,21 +111,19 @@ class AddEditCustomerViewModel @Inject constructor(
                         recordId = visit.recordId,
                         isEditMode = true,
                         date = visit.date,
-                        token = visit.token,
+                        storeId = visit.storeId,
+                        storeName = visit.storeName,
+                        branchId = visit.branchId,
+                        branchName = visit.branchName,
                         creName = visit.creName,
-                        creEmployeeId = visit.creEmployeeId,
-                        cusName = visit.cusName,
-                        mobNo = visit.mobNo,
-                        purposeOfVisit = visit.purposeOfVisit,
-                        prePp = visit.prePp,
-                        alterNo = visit.alterNo,
-                        srNo = visit.srNo,
-                        operator = visit.operator,
-                        gbp = visit.gbp,
-                        remarks = visit.remarks,
-                        happyCalling = visit.happyCalling,
-                        did = visit.did,
-                        refferel = visit.refferel,
+                        creUid = visit.creUid,
+                        cusName = visit.customerName,
+                        mobNo = visit.mobileNumber,
+                        purposeOfVisit = visit.reasonForVisit,
+                        prePp = visit.prePost,
+                        alterNo = visit.altNumber,
+                        gmb = visit.gmb,
+                        tagging = visit.tagging,
                         isLoading = false
                     )
                 }
@@ -141,6 +149,9 @@ class AddEditCustomerViewModel @Inject constructor(
     fun onHappyCallingChanged(value: String) { _uiState.update { it.copy(happyCalling = value) } }
     fun onDidChanged(value: String) { _uiState.update { it.copy(did = value) } }
     fun onRefferelChanged(value: String) { _uiState.update { it.copy(refferel = value) } }
+    fun onGmbChanged(value: String) { _uiState.update { it.copy(gmb = value) } }
+    fun onTaggingChanged(value: String) { _uiState.update { it.copy(tagging = value) } }
+    fun onStoreChanged(storeId: String, storeName: String) { _uiState.update { it.copy(storeId = storeId, storeName = storeName) } }
 
     fun saveCustomerRecord() {
         val s = _uiState.value
@@ -156,26 +167,24 @@ class AddEditCustomerViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
             val currentUser = authRepository.getCurrentEmployee()
-            val userUid = currentUser?.uid ?: ""
+            val userUid = currentUser?.employeeUid ?: ""
 
             val visit = CustomerVisit(
                 recordId = s.recordId ?: "",
+                storeId = s.storeId,
+                storeName = s.storeName,
+                branchId = if (s.branchId.isNotBlank()) s.branchId else (currentUser?.branchId ?: ""),
+                branchName = if (s.branchName.isNotBlank()) s.branchName else (currentUser?.branchName ?: ""),
                 date = s.date,
-                token = s.token,
+                creUid = if (s.creUid.isNotBlank()) s.creUid else userUid,
                 creName = s.creName,
-                creEmployeeId = s.creEmployeeId,
-                cusName = s.cusName.trim(),
-                mobNo = s.mobNo.trim(),
-                purposeOfVisit = s.purposeOfVisit,
-                prePp = s.prePp,
-                alterNo = s.alterNo.trim(),
-                srNo = s.srNo.trim(),
-                operator = s.operator,
-                gbp = s.gbp.trim(),
-                remarks = s.remarks.trim(),
-                happyCalling = s.happyCalling,
-                did = s.did.trim(),
-                refferel = s.refferel.trim(),
+                customerName = s.cusName.trim(),
+                mobileNumber = s.mobNo.trim(),
+                prePost = if (s.prePp.equals("PP", ignoreCase = true) || s.prePp.equals("POSTPAID", ignoreCase = true)) "POSTPAID" else "PREPAID",
+                altNumber = s.alterNo.trim(),
+                reasonForVisit = s.purposeOfVisit,
+                gmb = s.gmb,
+                tagging = s.tagging,
                 createdBy = userUid,
                 updatedBy = userUid
             )

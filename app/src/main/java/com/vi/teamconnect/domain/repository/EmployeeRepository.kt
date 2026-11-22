@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface EmployeeRepository {
     fun getAllEmployees(): Flow<List<Employee>>
+    fun getEmployeesByBranch(branchId: String): Flow<List<Employee>>
     fun getPendingApprovalEmployees(): Flow<List<Employee>>
 
     suspend fun approveEmployee(uid: String, adminName: String): Result<Unit>

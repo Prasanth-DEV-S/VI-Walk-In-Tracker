@@ -1,8 +1,10 @@
 package com.vi.teamconnect.domain.model
 
 enum class Role {
-    ADMIN,
-    EMPLOYEE
+    EMPLOYEE,
+    TL,
+    MANAGER,
+    ADMIN
 }
 
 enum class AccountStatus {
@@ -13,14 +15,20 @@ enum class AccountStatus {
 }
 
 data class Employee(
-    val uid: String = "",
+    val employeeUid: String = "",
     val employeeId: String = "",
-    val fullName: String = "",
-    val email: String = "",
     val phoneNumber: String = "",
+    val employeeName: String = "",
+    val branchId: String = "",
+    val branchName: String = "",
     val role: Role = Role.EMPLOYEE,
     val accountStatus: AccountStatus = AccountStatus.PENDING_APPROVAL,
     val createdAt: Long = System.currentTimeMillis(),
     val approvedAt: Long? = null,
     val approvedBy: String? = null
-)
+) {
+    // Backwards compatibility aliases
+    val uid: String get() = employeeUid
+    val fullName: String get() = employeeName
+    val email: String get() = ""
+}

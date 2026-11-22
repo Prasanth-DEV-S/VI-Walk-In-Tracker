@@ -6,11 +6,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import com.vi.teamconnect.presentation.theme.DarkCharcoal
+import com.vi.teamconnect.presentation.theme.LightGoldBorder
+import com.vi.teamconnect.presentation.theme.PrimaryGold
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -43,14 +48,23 @@ fun DatePickerTextField(
         value = dateValue,
         onValueChange = {},
         readOnly = true,
-        enabled = false,
         label = { Text(label) },
         trailingIcon = {
             Icon(
                 imageVector = Icons.Default.DateRange,
-                contentDescription = "Select Date"
+                contentDescription = "Select Date",
+                tint = PrimaryGold,
+                modifier = Modifier.clickable { datePickerDialog.show() }
             )
         },
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = PrimaryGold,
+            unfocusedBorderColor = LightGoldBorder,
+            focusedLabelColor = PrimaryGold,
+            unfocusedLabelColor = DarkCharcoal.copy(alpha = 0.7f),
+            focusedContainerColor = MaterialTheme.colorScheme.surface,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surface
+        ),
         modifier = modifier
             .fillMaxWidth()
             .clickable { datePickerDialog.show() }

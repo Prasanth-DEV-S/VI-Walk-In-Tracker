@@ -12,7 +12,20 @@
           "package_name": "com.vi.teamconnect"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "489057489411-e0giuud9t1jv28gtpm9fv3i9nj6isp6d.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.vi.teamconnect",
+            "certificate_hash": "b5e5d4e8221364f5b2b1c691b48490b675e27819"
+          }
+        },
+        {
+          "client_id": "489057489411-9upc779csfu07hl54qg7supgsir2m0mb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDbJQlGf5bFqTYbXNYNM4oB6F1AnLaksh0"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "489057489411-9upc779csfu07hl54qg7supgsir2m0mb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

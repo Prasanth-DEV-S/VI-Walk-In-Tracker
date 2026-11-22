@@ -1,6 +1,7 @@
 package com.vi.teamconnect.presentation.auth
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -17,17 +18,16 @@ import androidx.compose.material.icons.filled.Badge
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -35,17 +35,24 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.vi.teamconnect.presentation.theme.ViPurpleHeader
-import com.vi.teamconnect.presentation.theme.ViRedPrimary
-
-import androidx.compose.material.icons.filled.Email
+import com.vi.teamconnect.presentation.components.GoldGradientButton
+import com.vi.teamconnect.presentation.components.GoldOutlinedTextField
+import com.vi.teamconnect.presentation.components.VIDropdownField
+import com.vi.teamconnect.presentation.theme.DarkCharcoal
+import com.vi.teamconnect.presentation.theme.DeepGold
+import com.vi.teamconnect.presentation.theme.LightGold
+import com.vi.teamconnect.presentation.theme.LightGoldBorder
+import com.vi.teamconnect.presentation.theme.PrimaryBackground
+import com.vi.teamconnect.presentation.theme.PrimaryGold
+import com.vi.teamconnect.presentation.theme.SecondaryBackground
+import com.vi.teamconnect.presentation.theme.SecondaryGrey
 
 @Composable
 fun RegisterScreen(
@@ -57,7 +64,7 @@ fun RegisterScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(ViPurpleHeader),
+            .background(SecondaryBackground),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -70,20 +77,24 @@ fun RegisterScreen(
                 text = "VI TEAM CONNECT",
                 fontSize = 26.sp,
                 fontWeight = FontWeight.ExtraBold,
-                color = Color.White
+                color = DarkCharcoal,
+                letterSpacing = 1.sp
             )
             Text(
-                text = "Employee Registration",
+                text = if (uiState.isOtpSent) "OTP Verification" else "Employee Registration",
                 fontSize = 14.sp,
-                color = Color.White.copy(alpha = 0.8f),
-                modifier = Modifier.padding(top = 4.dp, bottom = 16.dp)
+                fontWeight = FontWeight.SemiBold,
+                color = DeepGold,
+                modifier = Modifier.padding(top = 4.dp, bottom = 20.dp)
             )
 
             Card(
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                shape = RoundedCornerShape(16.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-                modifier = Modifier.fillMaxWidth()
+                colors = CardDefaults.cardColors(containerColor = PrimaryBackground),
+                shape = RoundedCornerShape(20.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(width = 1.dp, color = LightGoldBorder, shape = RoundedCornerShape(20.dp))
             ) {
                 Column(
                     modifier = Modifier.padding(24.dp),
@@ -91,101 +102,185 @@ fun RegisterScreen(
                 ) {
                     if (uiState.isRegistrationSuccess) {
                         Text(
-                            text = "Registration Successful!",
+                            text = "Registration Submitted!",
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
+                            color = DeepGold
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(LightGold.copy(alpha = 0.3f), shape = RoundedCornerShape(10.dp))
+                                .border(1.dp, LightGoldBorder, shape = RoundedCornerShape(10.dp))
+                                .padding(16.dp)
+                        ) {
+                            Text(
+                                text = uiState.successMessage ?: "",
+                                fontSize = 14.sp,
+                                color = DarkCharcoal,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(24.dp))
+                        GoldGradientButton(
+                            text = "BACK TO LOGIN",
+                            onClick = onNavigateToLogin,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(48.dp)
+                        )
+                    } else if (uiState.isOtpSent) {
+                        Text(
+                            text = "Verify Phone Number",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = DarkCharcoal
                         )
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = uiState.successMessage ?: "",
-                            fontSize = 14.sp,
-                            color = MaterialTheme.colorScheme.onSurface
+
+                        if (uiState.successMessage != null) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(LightGold.copy(alpha = 0.2f), shape = RoundedCornerShape(10.dp))
+                                    .border(1.dp, LightGoldBorder, shape = RoundedCornerShape(10.dp))
+                                    .padding(12.dp)
+                            ) {
+                                Text(
+                                    text = uiState.successMessage!!,
+                                    fontSize = 13.sp,
+                                    color = DarkCharcoal,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
+
+                        GoldOutlinedTextField(
+                            value = uiState.otpCode,
+                            onValueChange = viewModel::onOtpCodeChanged,
+                            label = "Enter 6-Digit OTP *",
+                            trailingIcon = { Icon(Icons.Default.Security, contentDescription = null, tint = PrimaryGold) }
                         )
+
+                        if (uiState.errorMessage != null) {
+                            Text(
+                                text = uiState.errorMessage!!,
+                                color = MaterialTheme.colorScheme.error,
+                                fontSize = 13.sp,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.padding(top = 10.dp)
+                            )
+                        }
+
                         Spacer(modifier = Modifier.height(20.dp))
-                        Button(
-                            onClick = onNavigateToLogin,
-                            colors = ButtonDefaults.buttonColors(containerColor = ViRedPrimary),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text("BACK TO LOGIN")
+
+                        GoldGradientButton(
+                            text = "VERIFY OTP & REGISTER",
+                            onClick = viewModel::verifyOtpAndRegister,
+                            isLoading = uiState.isLoading,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(48.dp)
+                        )
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        TextButton(onClick = viewModel::resetOtpStep) {
+                            Text("Edit Form / Resend OTP", color = DeepGold, fontWeight = FontWeight.SemiBold)
+                        }
+
+                        TextButton(onClick = onNavigateToLogin) {
+                            Text("Already registered? Login here", color = SecondaryGrey)
                         }
                     } else {
-                        OutlinedTextField(
-                            value = uiState.email,
-                            onValueChange = viewModel::onEmailChanged,
-                            label = { Text("Email Address") },
-                            leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                            singleLine = true,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        OutlinedTextField(
+                        GoldOutlinedTextField(
                             value = uiState.employeeId,
                             onValueChange = viewModel::onEmployeeIdChanged,
-                            label = { Text("Employee ID") },
-                            leadingIcon = { Icon(Icons.Default.Badge, contentDescription = null) },
-                            singleLine = true,
-                            modifier = Modifier.fillMaxWidth()
+                            label = "Employee ID (Unique) *",
+                            trailingIcon = { Icon(Icons.Default.Badge, contentDescription = null, tint = PrimaryGold) }
                         )
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
 
-                        OutlinedTextField(
-                            value = uiState.fullName,
-                            onValueChange = viewModel::onFullNameChanged,
-                            label = { Text("Full Name") },
-                            leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
-                            singleLine = true,
-                            modifier = Modifier.fillMaxWidth()
+                        GoldOutlinedTextField(
+                            value = uiState.employeeName,
+                            onValueChange = viewModel::onEmployeeNameChanged,
+                            label = "Full Employee Name *",
+                            trailingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = PrimaryGold) }
                         )
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
 
-                        OutlinedTextField(
+                        GoldOutlinedTextField(
                             value = uiState.phoneNumber,
                             onValueChange = viewModel::onPhoneNumberChanged,
-                            label = { Text("Phone Number") },
-                            leadingIcon = { Icon(Icons.Default.Phone, contentDescription = null) },
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                            singleLine = true,
-                            modifier = Modifier.fillMaxWidth()
+                            label = "Phone Number (10 digits) *",
+                            trailingIcon = { Icon(Icons.Default.Phone, contentDescription = null, tint = PrimaryGold) }
                         )
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        VIDropdownField(
+                            label = "Assigned Branch *",
+                            selectedValue = uiState.selectedBranch?.branchName ?: "",
+                            options = uiState.branches.map { it.branchName },
+                            onValueChange = { selectedName ->
+                                val branchObj = uiState.branches.firstOrNull { it.branchName == selectedName }
+                                if (branchObj != null) {
+                                    viewModel.onBranchSelected(branchObj)
+                                }
+                            }
+                        )
+
+                        Spacer(modifier = Modifier.height(10.dp))
 
                         OutlinedTextField(
                             value = uiState.password,
                             onValueChange = viewModel::onPasswordChanged,
-                            label = { Text("Password") },
-                            leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
+                            label = { Text("Create Password *") },
+                            leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = PrimaryGold) },
                             trailingIcon = {
                                 IconButton(onClick = viewModel::togglePasswordVisibility) {
                                     Icon(
                                         imageVector = if (uiState.isPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                                        contentDescription = "Toggle Password"
+                                        contentDescription = "Toggle Password",
+                                        tint = PrimaryGold
                                     )
                                 }
                             },
                             visualTransformation = if (uiState.isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                             singleLine = true,
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = PrimaryGold,
+                                unfocusedBorderColor = LightGoldBorder,
+                                focusedLabelColor = PrimaryGold,
+                                unfocusedLabelColor = SecondaryGrey
+                            ),
+                            shape = RoundedCornerShape(10.dp),
                             modifier = Modifier.fillMaxWidth()
                         )
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
 
                         OutlinedTextField(
                             value = uiState.confirmPassword,
                             onValueChange = viewModel::onConfirmPasswordChanged,
-                            label = { Text("Confirm Password") },
-                            leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
+                            label = { Text("Confirm Password *") },
+                            leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = PrimaryGold) },
                             visualTransformation = if (uiState.isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                             singleLine = true,
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = PrimaryGold,
+                                unfocusedBorderColor = LightGoldBorder,
+                                focusedLabelColor = PrimaryGold,
+                                unfocusedLabelColor = SecondaryGrey
+                            ),
+                            shape = RoundedCornerShape(10.dp),
                             modifier = Modifier.fillMaxWidth()
                         )
 
@@ -194,32 +289,26 @@ fun RegisterScreen(
                                 text = uiState.errorMessage!!,
                                 color = MaterialTheme.colorScheme.error,
                                 fontSize = 13.sp,
-                                modifier = Modifier.padding(top = 8.dp)
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.padding(top = 10.dp)
                             )
                         }
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(20.dp))
 
-                        Button(
-                            onClick = viewModel::register,
-                            enabled = !uiState.isLoading,
-                            colors = ButtonDefaults.buttonColors(containerColor = ViRedPrimary),
-                            shape = RoundedCornerShape(8.dp),
+                        GoldGradientButton(
+                            text = "SEND OTP FOR VERIFICATION",
+                            onClick = viewModel::sendOtp,
+                            isLoading = uiState.isLoading,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(48.dp)
-                        ) {
-                            if (uiState.isLoading) {
-                                CircularProgressIndicator(color = Color.White, modifier = Modifier.padding(4.dp))
-                            } else {
-                                Text("SUBMIT REGISTRATION", fontWeight = FontWeight.Bold, fontSize = 15.sp)
-                            }
-                        }
+                        )
 
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
 
                         TextButton(onClick = onNavigateToLogin) {
-                            Text("Already registered? Login here", color = ViPurpleHeader)
+                            Text("Already registered? Login here", color = DeepGold, fontWeight = FontWeight.Bold)
                         }
                     }
                 }

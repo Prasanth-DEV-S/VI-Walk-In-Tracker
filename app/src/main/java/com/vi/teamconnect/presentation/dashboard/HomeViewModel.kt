@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class HomeUiState(
@@ -44,4 +45,12 @@ class HomeViewModel @Inject constructor(
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = HomeUiState(isLoading = true)
     )
+
+    fun updateCustomerVisit(visit: CustomerVisit) {
+        viewModelScope.launch {
+            val user = authRepository.getCurrentEmployee()
+            val updated = visit.copy(updatedBy = user?.employeeUid ?: "")
+            customerRepository.updateCustomerVisit(updated)
+        }
+    }
 }

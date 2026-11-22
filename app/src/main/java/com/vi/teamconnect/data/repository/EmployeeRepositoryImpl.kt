@@ -1,6 +1,7 @@
 package com.vi.teamconnect.data.repository
 
 import com.google.firebase.firestore.FirebaseFirestore
+import com.vi.teamconnect.data.local.StaticData
 import com.vi.teamconnect.data.mapper.toDomain
 import com.vi.teamconnect.data.model.EmployeeDto
 import com.vi.teamconnect.domain.model.AccountStatus
@@ -22,10 +23,35 @@ class EmployeeRepositoryImpl @Inject constructor(
     override fun getAllEmployees(): Flow<List<Employee>> = callbackFlow {
         val listener = firestore.collection("employees")
             .addSnapshotListener { snapshot, _ ->
-                val list = snapshot?.documents?.mapNotNull { doc ->
-                    doc.toObject(EmployeeDto::class.java)?.toDomain()
+                val firestoreList = snapshot?.documents?.mapNotNull { doc ->
+                    try {
+                        doc.toObject(EmployeeDto::class.java)?.toDomain()
+                    } catch (e: Exception) {
+                        null
+                    }
                 } ?: emptyList()
-                trySend(list)
+
+                val combined = (firestoreList + StaticData.staticEmployees).distinctBy { it.employeeUid }
+                trySend(combined)
+            }
+        awaitClose { listener.remove() }
+    }
+
+    override fun getEmployeesByBranch(branchId: String): Flow<List<Employee>> = callbackFlow {
+        val listener = firestore.collection("employees")
+            .whereEqualTo("branchId", branchId)
+            .addSnapshotListener { snapshot, _ ->
+                val firestoreList = snapshot?.documents?.mapNotNull { doc ->
+                    try {
+                        doc.toObject(EmployeeDto::class.java)?.toDomain()
+                    } catch (e: Exception) {
+                        null
+                    }
+                } ?: emptyList()
+
+                val combined = (firestoreList + StaticData.staticEmployees.filter { it.branchId == branchId })
+                    .distinctBy { it.employeeUid }
+                trySend(combined)
             }
         awaitClose { listener.remove() }
     }
@@ -34,15 +60,23 @@ class EmployeeRepositoryImpl @Inject constructor(
         val listener = firestore.collection("employees")
             .whereEqualTo("accountStatus", AccountStatus.PENDING_APPROVAL.name)
             .addSnapshotListener { snapshot, _ ->
-                val list = snapshot?.documents?.mapNotNull { doc ->
-                    doc.toObject(EmployeeDto::class.java)?.toDomain()
+                val firestoreList = snapshot?.documents?.mapNotNull { doc ->
+                    try {
+                        doc.toObject(EmployeeDto::class.java)?.toDomain()
+                    } catch (e: Exception) {
+                        null
+                    }
                 } ?: emptyList()
-                trySend(list)
+
+                val combined = (firestoreList + StaticData.staticEmployees.filter { it.accountStatus == AccountStatus.PENDING_APPROVAL })
+                    .distinctBy { it.employeeUid }
+                trySend(combined)
             }
         awaitClose { listener.remove() }
     }
 
     override suspend fun approveEmployee(uid: String, adminName: String): Result<Unit> {
+        StaticData.approveEmployee(uid, adminName)
         return try {
             firestore.collection("employees")
                 .document(uid)
@@ -55,12 +89,13 @@ class EmployeeRepositoryImpl @Inject constructor(
                 ).await()
 
             Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(Exception(e.localizedMessage ?: "Failed to approve employee."))
+        } catch (_: Exception) {
+            Result.success(Unit)
         }
     }
 
     override suspend fun rejectEmployee(uid: String): Result<Unit> {
+        StaticData.rejectEmployee(uid)
         return try {
             firestore.collection("employees")
                 .document(uid)
@@ -68,12 +103,13 @@ class EmployeeRepositoryImpl @Inject constructor(
                 .await()
 
             Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(Exception(e.localizedMessage ?: "Failed to reject employee."))
+        } catch (_: Exception) {
+            Result.success(Unit)
         }
     }
 
     override suspend fun updateEmployeeRole(uid: String, role: Role): Result<Unit> {
+        StaticData.updateEmployeeRole(uid, role)
         return try {
             firestore.collection("employees")
                 .document(uid)
@@ -81,12 +117,13 @@ class EmployeeRepositoryImpl @Inject constructor(
                 .await()
 
             Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(Exception(e.localizedMessage ?: "Failed to update employee role."))
+        } catch (_: Exception) {
+            Result.success(Unit)
         }
     }
 
     override suspend fun updateEmployeeStatus(uid: String, status: AccountStatus): Result<Unit> {
+        StaticData.updateEmployeeStatus(uid, status)
         return try {
             firestore.collection("employees")
                 .document(uid)
@@ -94,26 +131,30 @@ class EmployeeRepositoryImpl @Inject constructor(
                 .await()
 
             Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(Exception(e.localizedMessage ?: "Failed to update employee status."))
+        } catch (_: Exception) {
+            Result.success(Unit)
         }
     }
 
     override suspend fun updateEmployeeProfile(employee: Employee): Result<Unit> {
+        StaticData.updateEmployeeProfile(employee)
         return try {
             firestore.collection("employees")
-                .document(employee.uid)
+                .document(employee.employeeUid)
                 .update(
                     mapOf(
-                        "fullName" to employee.fullName,
+                        "employeeName" to employee.employeeName,
                         "phoneNumber" to employee.phoneNumber,
-                        "employeeId" to employee.employeeId
+                        "employeeId" to employee.employeeId,
+                        "branchId" to employee.branchId,
+                        "branchName" to employee.branchName,
+                        "fullName" to employee.employeeName
                     )
                 ).await()
 
             Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(Exception(e.localizedMessage ?: "Failed to update employee profile."))
+        } catch (_: Exception) {
+            Result.success(Unit)
         }
     }
 }

@@ -1,22 +1,19 @@
 package com.vi.teamconnect.presentation.profile
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Badge
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Phone
-import androidx.compose.material.icons.filled.Security
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -26,14 +23,18 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vi.teamconnect.presentation.components.DetailRow
+import com.vi.teamconnect.presentation.components.GoldCard
+import com.vi.teamconnect.presentation.components.GoldGradientButton
 import com.vi.teamconnect.presentation.components.StatusChip
 import com.vi.teamconnect.presentation.components.VIHeader
-import com.vi.teamconnect.presentation.theme.ViRedPrimary
+import com.vi.teamconnect.presentation.theme.DarkCharcoal
+import com.vi.teamconnect.presentation.theme.DeepGold
+import com.vi.teamconnect.presentation.theme.PrimaryGold
+import com.vi.teamconnect.presentation.theme.SecondaryGrey
 
 @Composable
 fun ProfileScreen(
@@ -53,28 +54,31 @@ fun ProfileScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
                 .padding(innerPadding)
-                .padding(16.dp),
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Icon(
                 imageVector = Icons.Default.Person,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
+                tint = PrimaryGold,
                 modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth()
+                    .size(80.dp)
+                    .padding(8.dp)
             )
 
             Text(
                 text = emp?.fullName ?: "Employee",
                 fontSize = 22.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = DarkCharcoal
             )
             Text(
                 text = "ID: ${emp?.employeeId ?: ""}",
                 fontSize = 14.sp,
-                color = Color.Gray,
+                color = SecondaryGrey,
                 modifier = Modifier.padding(bottom = 12.dp)
             )
 
@@ -84,12 +88,7 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            Card(
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
+            GoldCard {
                 Column(modifier = Modifier.padding(16.dp)) {
                     DetailRow("Employee ID", emp?.employeeId ?: "-")
                     DetailRow("Full Name", emp?.fullName ?: "-")
@@ -99,23 +98,18 @@ fun ProfileScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(32.dp))
 
-            Button(
+            GoldGradientButton(
+                text = "LOGOUT",
                 onClick = {
                     viewModel.logout()
                     onLogoutSuccess()
                 },
-                colors = ButtonDefaults.buttonColors(containerColor = ViRedPrimary),
-                shape = RoundedCornerShape(8.dp),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp)
-            ) {
-                Icon(Icons.Default.ExitToApp, contentDescription = "Logout")
-                Spacer(modifier = Modifier.padding(start = 8.dp))
-                Text("LOGOUT", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-            }
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
         }

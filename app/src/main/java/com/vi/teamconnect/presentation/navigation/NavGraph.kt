@@ -10,12 +10,15 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -49,6 +52,10 @@ import com.vi.teamconnect.presentation.reports.ReportsScreen
 import com.vi.teamconnect.presentation.reports.ReportsViewModel
 import com.vi.teamconnect.presentation.settings.SettingsScreen
 import com.vi.teamconnect.presentation.settings.SettingsViewModel
+import com.vi.teamconnect.presentation.theme.DeepGold
+import com.vi.teamconnect.presentation.theme.PrimaryBackground
+import com.vi.teamconnect.presentation.theme.SecondaryGrey
+import com.vi.teamconnect.presentation.theme.SoftGoldHighlight
 
 data class BottomNavItem(
     val title: String,
@@ -77,12 +84,23 @@ fun MainAppNavigation(
     Scaffold(
         bottomBar = {
             if (showBottomBar) {
-                NavigationBar {
+                NavigationBar(
+                    containerColor = PrimaryBackground,
+                    tonalElevation = 8.dp
+                ) {
                     bottomNavItems.forEach { item ->
+                        val selected = currentRoute == item.route
                         NavigationBarItem(
                             icon = { Icon(item.icon, contentDescription = item.title) },
-                            label = { Text(item.title) },
-                            selected = currentRoute == item.route,
+                            label = { Text(item.title, fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal) },
+                            selected = selected,
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = DeepGold,
+                                unselectedIconColor = SecondaryGrey,
+                                selectedTextColor = DeepGold,
+                                unselectedTextColor = SecondaryGrey,
+                                indicatorColor = SoftGoldHighlight
+                            ),
                             onClick = {
                                 navController.navigate(item.route) {
                                     popUpTo(navController.graph.findStartDestination().id) {

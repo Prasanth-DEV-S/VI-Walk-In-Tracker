@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.vi.teamconnect.domain.model.CustomerFilter
 import com.vi.teamconnect.domain.model.CustomerVisit
 import com.vi.teamconnect.domain.model.SortBy
+import com.vi.teamconnect.domain.repository.AuthRepository
 import com.vi.teamconnect.domain.repository.CustomerRepository
 import com.vi.teamconnect.domain.repository.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,14 +17,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class CustomerListUiState(
     val filter: CustomerFilter = CustomerFilter(),
     val visits: List<CustomerVisit> = emptyList(),
     val isLoading: Boolean = false,
-    val purposeOptions: List<String> = emptyList(),
-    val operatorOptions: List<String> = emptyList(),
     val isFilterSheetVisible: Boolean = false
 )
 
@@ -31,6 +31,7 @@ data class CustomerListUiState(
 @HiltViewModel
 class CustomerListViewModel @Inject constructor(
     private val customerRepository: CustomerRepository,
+    private val authRepository: AuthRepository,
     private val settingsRepository: SettingsRepository
 ) : ViewModel() {
 
@@ -66,5 +67,13 @@ class CustomerListViewModel @Inject constructor(
 
     fun setSortBy(sortBy: SortBy) {
         _filter.update { it.copy(sortBy = sortBy) }
+    }
+
+    fun updateCustomerVisit(visit: CustomerVisit) {
+        viewModelScope.launch {
+            val user = authRepository.getCurrentEmployee()
+            val updated = visit.copy(updatedBy = user?.employeeUid ?: "")
+            customerRepository.updateCustomerVisit(updated)
+        }
     }
 }

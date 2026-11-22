@@ -1,23 +1,38 @@
 package com.vi.teamconnect.presentation.theme
 
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 
-val ViRedPrimary = Color(0xFFE60000)
-val ViPurpleHeader = Color(0xFF4A154B)
-val ViRedDark = Color(0xFFB30000)
-val ViAccentGold = Color(0xFFFFC20E)
+// White & Gold Premium Palette
+val PrimaryBackground = Color(0xFFFFFFFF)
+val SecondaryBackground = Color(0xFFFAF9F6)
+val PrimaryGold = Color(0xFFD4AF37)
+val LightGold = Color(0xFFF5E6B3)
+val DeepGold = Color(0xFFB8860B)
+val DarkCharcoal = Color(0xFF252525)
+val SecondaryGrey = Color(0xFF777777)
+val CardWhite = Color(0xFFFFFFFF)
+val LightGoldBorder = Color(0xFFE8D9AE)
+val SoftGoldHighlight = Color(0xFFFAF3DF)
 
-val LightBackground = Color(0xFFF7F8FA)
-val LightSurface = Color(0xFFFFFFFF)
-val LightOnSurface = Color(0xFF1F1F1F)
-val LightSurfaceVariant = Color(0xFFEFF1F5)
-
-val DarkBackground = Color(0xFF121212)
-val DarkSurface = Color(0xFF1E1E1E)
-val DarkOnSurface = Color(0xFFE0E0E0)
-
+// Status colors
 val StatusActiveGreen = Color(0xFF2E7D32)
-val StatusPendingOrange = Color(0xFFED6C02)
-val StatusRejectedRed = Color(0xFFD32F2F)
-val StatusPreBlue = Color(0xFF0288D1)
-val StatusPpPurple = Color(0xFF7B1FA2)
+val StatusPendingAmber = Color(0xFFD97706)
+val StatusRejectedRed = Color(0xFFDC2626)
+
+// Premium Gradients
+val PrimaryGoldGradient = Brush.horizontalGradient(
+    colors = listOf(LightGold, PrimaryGold)
+)
+
+val GoldButtonGradient = Brush.horizontalGradient(
+    colors = listOf(LightGold, PrimaryGold)
+)
+
+val DashboardHighlightGradient = Brush.verticalGradient(
+    colors = listOf(PrimaryBackground, SoftGoldHighlight)
+)
+
+val PremiumCardAccentGradient = Brush.horizontalGradient(
+    colors = listOf(PrimaryGold, DeepGold)
+)

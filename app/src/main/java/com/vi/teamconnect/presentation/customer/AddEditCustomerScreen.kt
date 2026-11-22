@@ -1,5 +1,6 @@
 package com.vi.teamconnect.presentation.customer
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -7,15 +8,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,15 +22,17 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vi.teamconnect.presentation.components.DatePickerTextField
+import com.vi.teamconnect.presentation.components.GoldGradientButton
+import com.vi.teamconnect.presentation.components.GoldOutlinedTextField
 import com.vi.teamconnect.presentation.components.VIDropdownField
 import com.vi.teamconnect.presentation.components.VIHeader
-import com.vi.teamconnect.presentation.theme.ViRedPrimary
+import com.vi.teamconnect.presentation.theme.DarkCharcoal
+import com.vi.teamconnect.presentation.theme.DeepGold
+import com.vi.teamconnect.presentation.theme.PrimaryGold
 
 @Composable
 fun AddEditCustomerScreen(
@@ -50,7 +50,7 @@ fun AddEditCustomerScreen(
     Scaffold(
         topBar = {
             VIHeader(
-                title = if (uiState.isEditMode) "Edit Customer Record" else "Add Customer Record",
+                title = if (uiState.isEditMode) "Edit Customer Record" else "Walk-In Customer Form",
                 onBackClick = onNavigateBack
             )
         }
@@ -58,82 +58,71 @@ fun AddEditCustomerScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
                 .padding(innerPadding)
                 .padding(horizontal = 16.dp, vertical = 8.dp)
                 .verticalScroll(rememberScrollState())
         ) {
             Text(
-                text = "15 Field Customer Visit Form",
+                text = "Walk-In Customer Entry",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary,
+                color = DeepGold,
                 modifier = Modifier.padding(vertical = 8.dp)
             )
 
-            // 1. DATE
+            // 1. Store Name
+            VIDropdownField(
+                label = "1. Store Name *",
+                selectedValue = uiState.storeName.ifEmpty { "Vi Store Main" },
+                options = listOf("Vi Store Main", "Vi Store CP", "Vi Store Andheri", "Vi Store MG Road", "Vi Store Anna Nagar"),
+                onValueChange = { name -> viewModel.onStoreChanged("STORE-${name.takeLast(4)}", name) }
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // 2. Date
             DatePickerTextField(
-                label = "1. DATE",
+                label = "2. Date *",
                 dateValue = uiState.date,
                 onDateSelected = viewModel::onDateChanged
             )
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            // 2. TOKEN & 3. CRE NAME
-            Row(modifier = Modifier.fillMaxWidth()) {
-                OutlinedTextField(
-                    value = uiState.token,
-                    onValueChange = viewModel::onTokenChanged,
-                    label = { Text("2. TOKEN") },
-                    singleLine = true,
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(end = 6.dp)
-                )
-
-                OutlinedTextField(
-                    value = uiState.creName,
-                    onValueChange = viewModel::onCreNameChanged,
-                    label = { Text("3. CRE NAME") },
-                    singleLine = true,
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(start = 6.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            // 4. CUS NAME
-            OutlinedTextField(
-                value = uiState.cusName,
-                onValueChange = viewModel::onCusNameChanged,
-                label = { Text("4. CUS NAME *") },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth()
+            // 3. CRE Name
+            GoldOutlinedTextField(
+                value = uiState.creName,
+                onValueChange = viewModel::onCreNameChanged,
+                label = "3. CRE Name *"
             )
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            // 5. MOB NO & 8. ALTER NO
+            // 4. CUSTOMER NAME
+            GoldOutlinedTextField(
+                value = uiState.cusName,
+                onValueChange = viewModel::onCusNameChanged,
+                label = "4. CUSTOMER NAME *"
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // 5. MOB NUMBER & 7. ALT NUMBER
             Row(modifier = Modifier.fillMaxWidth()) {
-                OutlinedTextField(
+                GoldOutlinedTextField(
                     value = uiState.mobNo,
                     onValueChange = viewModel::onMobNoChanged,
-                    label = { Text("5. MOB NO *") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                    singleLine = true,
+                    label = "5. MOB NUMBER *",
                     modifier = Modifier
                         .weight(1f)
                         .padding(end = 6.dp)
                 )
 
-                OutlinedTextField(
+                GoldOutlinedTextField(
                     value = uiState.alterNo,
                     onValueChange = viewModel::onAlterNoChanged,
-                    label = { Text("8. ALTER NO") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                    singleLine = true,
+                    label = "7. ALT NUMBER",
                     modifier = Modifier
                         .weight(1f)
                         .padding(start = 6.dp)
@@ -142,110 +131,79 @@ fun AddEditCustomerScreen(
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            // 6. PURPOSE OF VISIT
+            // 6. PRE/POST
+            Text("6. PRE / POST *", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = DarkCharcoal)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                RadioButton(
+                    selected = uiState.prePp.equals("PREPAID", ignoreCase = true) || uiState.prePp.equals("PRE", ignoreCase = true),
+                    onClick = { viewModel.onPrePpChanged("PREPAID") },
+                    colors = RadioButtonDefaults.colors(selectedColor = PrimaryGold)
+                )
+                Text("PREPAID", fontSize = 14.sp)
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                RadioButton(
+                    selected = uiState.prePp.equals("POSTPAID", ignoreCase = true) || uiState.prePp.equals("PP", ignoreCase = true),
+                    onClick = { viewModel.onPrePpChanged("POSTPAID") },
+                    colors = RadioButtonDefaults.colors(selectedColor = PrimaryGold)
+                )
+                Text("POSTPAID", fontSize = 14.sp)
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // 8. REASON FOR VISIT
             VIDropdownField(
-                label = "6. PURPOSE OF VISIT",
+                label = "8. REASON FOR VISIT *",
                 selectedValue = uiState.purposeOfVisit,
-                options = uiState.settings.purposeOptions,
+                options = listOf("SIM Replacement", "SIM Swap", "Bill Payment", "New Connection", "MNP Port-in", "Plan Upgrade", "VAS Inquiry", "Other"),
                 onValueChange = viewModel::onPurposeOfVisitChanged
             )
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            // 7. PRE/PP & 10. OPERATOR
-            Row(modifier = Modifier.fillMaxWidth()) {
-                VIDropdownField(
-                    label = "7. PRE/PP",
-                    selectedValue = uiState.prePp,
-                    options = uiState.settings.prePpOptions,
-                    onValueChange = viewModel::onPrePpChanged,
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(end = 6.dp)
+            // 9. GMB Status
+            Text("9. GMB *", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = DarkCharcoal)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                RadioButton(
+                    selected = uiState.gmb.equals("YES", ignoreCase = true),
+                    onClick = { viewModel.onGmbChanged("YES") },
+                    colors = RadioButtonDefaults.colors(selectedColor = PrimaryGold)
                 )
+                Text("YES", fontSize = 14.sp)
 
-                VIDropdownField(
-                    label = "10. OPERATOR",
-                    selectedValue = uiState.operator,
-                    options = uiState.settings.operatorOptions,
-                    onValueChange = viewModel::onOperatorChanged,
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(start = 6.dp)
+                Spacer(modifier = Modifier.width(16.dp))
+
+                RadioButton(
+                    selected = uiState.gmb.equals("NO", ignoreCase = true),
+                    onClick = { viewModel.onGmbChanged("NO") },
+                    colors = RadioButtonDefaults.colors(selectedColor = PrimaryGold)
                 )
+                Text("NO", fontSize = 14.sp)
             }
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            // 9. SR NO & 11. GBP
-            Row(modifier = Modifier.fillMaxWidth()) {
-                OutlinedTextField(
-                    value = uiState.srNo,
-                    onValueChange = viewModel::onSrNoChanged,
-                    label = { Text("9. SR NO") },
-                    singleLine = true,
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(end = 6.dp)
+            // 10. TAGGING Status
+            Text("10. TAGGING *", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = DarkCharcoal)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                RadioButton(
+                    selected = uiState.tagging.equals("YES", ignoreCase = true),
+                    onClick = { viewModel.onTaggingChanged("YES") },
+                    colors = RadioButtonDefaults.colors(selectedColor = PrimaryGold)
                 )
+                Text("YES", fontSize = 14.sp)
 
-                OutlinedTextField(
-                    value = uiState.gbp,
-                    onValueChange = viewModel::onGbpChanged,
-                    label = { Text("11. GBP") },
-                    singleLine = true,
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(start = 6.dp)
+                Spacer(modifier = Modifier.width(16.dp))
+
+                RadioButton(
+                    selected = uiState.tagging.equals("NO", ignoreCase = true),
+                    onClick = { viewModel.onTaggingChanged("NO") },
+                    colors = RadioButtonDefaults.colors(selectedColor = PrimaryGold)
                 )
+                Text("NO", fontSize = 14.sp)
             }
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            // 13. Happy calling & 14. DID
-            Row(modifier = Modifier.fillMaxWidth()) {
-                VIDropdownField(
-                    label = "13. Happy calling",
-                    selectedValue = uiState.happyCalling,
-                    options = uiState.settings.happyCallingOptions,
-                    onValueChange = viewModel::onHappyCallingChanged,
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(end = 6.dp)
-                )
-
-                OutlinedTextField(
-                    value = uiState.did,
-                    onValueChange = viewModel::onDidChanged,
-                    label = { Text("14. DID") },
-                    singleLine = true,
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(start = 6.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            // 15. Refferel
-            VIDropdownField(
-                label = "15. Refferel",
-                selectedValue = uiState.refferel,
-                options = uiState.settings.referralOptions,
-                onValueChange = viewModel::onRefferelChanged
-            )
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            // 12. Remarks
-            OutlinedTextField(
-                value = uiState.remarks,
-                onValueChange = viewModel::onRemarksChanged,
-                label = { Text("12. Remarks") },
-                minLines = 3,
-                maxLines = 5,
-                modifier = Modifier.fillMaxWidth()
-            )
 
             if (uiState.errorMessage != null) {
                 Text(
@@ -258,25 +216,14 @@ fun AddEditCustomerScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            Button(
+            GoldGradientButton(
+                text = if (uiState.isEditMode) "UPDATE RECORD" else "SAVE CUSTOMER RECORD",
                 onClick = viewModel::saveCustomerRecord,
-                enabled = !uiState.isLoading,
-                colors = ButtonDefaults.buttonColors(containerColor = ViRedPrimary),
-                shape = RoundedCornerShape(8.dp),
+                isLoading = uiState.isLoading,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp)
-            ) {
-                if (uiState.isLoading) {
-                    CircularProgressIndicator(color = Color.White, modifier = Modifier.padding(4.dp))
-                } else {
-                    Text(
-                        text = if (uiState.isEditMode) "UPDATE RECORD" else "SAVE CUSTOMER RECORD",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
-                    )
-                }
-            }
+            )
 
             Spacer(modifier = Modifier.height(24.dp))
         }
