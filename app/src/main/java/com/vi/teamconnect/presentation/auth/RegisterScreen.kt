@@ -15,10 +15,10 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Badge
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
-import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Card
@@ -81,7 +81,7 @@ fun RegisterScreen(
                 letterSpacing = 1.sp
             )
             Text(
-                text = if (uiState.isOtpSent) "OTP Verification" else "Employee Registration",
+                text = "Employee Registration",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = DeepGold,
@@ -130,71 +130,6 @@ fun RegisterScreen(
                                 .fillMaxWidth()
                                 .height(48.dp)
                         )
-                    } else if (uiState.isOtpSent) {
-                        Text(
-                            text = "Verify Phone Number",
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = DarkCharcoal
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        if (uiState.successMessage != null) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .background(LightGold.copy(alpha = 0.2f), shape = RoundedCornerShape(10.dp))
-                                    .border(1.dp, LightGoldBorder, shape = RoundedCornerShape(10.dp))
-                                    .padding(12.dp)
-                            ) {
-                                Text(
-                                    text = uiState.successMessage!!,
-                                    fontSize = 13.sp,
-                                    color = DarkCharcoal,
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(16.dp))
-                        }
-
-                        GoldOutlinedTextField(
-                            value = uiState.otpCode,
-                            onValueChange = viewModel::onOtpCodeChanged,
-                            label = "Enter 6-Digit OTP *",
-                            trailingIcon = { Icon(Icons.Default.Security, contentDescription = null, tint = PrimaryGold) }
-                        )
-
-                        if (uiState.errorMessage != null) {
-                            Text(
-                                text = uiState.errorMessage!!,
-                                color = MaterialTheme.colorScheme.error,
-                                fontSize = 13.sp,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.padding(top = 10.dp)
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.height(20.dp))
-
-                        GoldGradientButton(
-                            text = "VERIFY OTP & REGISTER",
-                            onClick = viewModel::verifyOtpAndRegister,
-                            isLoading = uiState.isLoading,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(48.dp)
-                        )
-
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        TextButton(onClick = viewModel::resetOtpStep) {
-                            Text("Edit Form / Resend OTP", color = DeepGold, fontWeight = FontWeight.SemiBold)
-                        }
-
-                        TextButton(onClick = onNavigateToLogin) {
-                            Text("Already registered? Login here", color = SecondaryGrey)
-                        }
                     } else {
                         GoldOutlinedTextField(
                             value = uiState.employeeId,
@@ -210,6 +145,15 @@ fun RegisterScreen(
                             onValueChange = viewModel::onEmployeeNameChanged,
                             label = "Full Employee Name *",
                             trailingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = PrimaryGold) }
+                        )
+
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        GoldOutlinedTextField(
+                            value = uiState.email,
+                            onValueChange = viewModel::onEmailChanged,
+                            label = "Email Address (Optional)",
+                            trailingIcon = { Icon(Icons.Default.Email, contentDescription = null, tint = PrimaryGold) }
                         )
 
                         Spacer(modifier = Modifier.height(10.dp))
@@ -297,8 +241,8 @@ fun RegisterScreen(
                         Spacer(modifier = Modifier.height(20.dp))
 
                         GoldGradientButton(
-                            text = "SEND OTP FOR VERIFICATION",
-                            onClick = viewModel::sendOtp,
+                            text = "SUBMIT REGISTRATION",
+                            onClick = viewModel::register,
                             isLoading = uiState.isLoading,
                             modifier = Modifier
                                 .fillMaxWidth()

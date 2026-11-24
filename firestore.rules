@@ -7,62 +7,87 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function isOwner(uid) {
-      return isAuthenticated() && request.auth.uid == uid;
-    }
-
-    function getEmployeeData() {
+    function getUserData() {
       return get(/databases/$(database)/documents/employees/$(request.auth.uid)).data;
     }
 
-    function isActiveEmployee() {
-      return isAuthenticated() && getEmployeeData().accountStatus == 'ACTIVE';
+    function isActiveUser() {
+      return isAuthenticated() && getUserData().accountStatus == 'ACTIVE';
+    }
+
+    function isMasterAdmin() {
+      return isActiveUser() && getUserData().role == 'MASTER_ADMIN';
     }
 
     function isAdmin() {
-      return isActiveEmployee() && getEmployeeData().role == 'ADMIN';
+      return isMasterAdmin() || (isActiveUser() && getUserData().role == 'ADMIN');
+    }
+
+    function isManager() {
+      return isAdmin() || (isActiveUser() && getUserData().role == 'MANAGER');
     }
 
     // Employees Collection
     match /employees/{employeeUid} {
       allow read: if isAuthenticated();
-      allow create: if isOwner(employeeUid)
-                    && request.resource.data.accountStatus == 'PENDING_APPROVAL'
-                    && request.resource.data.role == 'EMPLOYEE';
-      allow update: if isAdmin() || (
-        isOwner(employeeUid) &&
+
+      // Allow initial registration
+      allow create: if isAuthenticated() || request.resource.data.accountStatus == 'PENDING_APPROVAL';
+
+      // Update role & status: Only Master Admin & Admins (Admins cannot assign MASTER_ADMIN)
+      allow update: if isMasterAdmin() || (
+        isAdmin() &&
+        request.resource.data.role != 'MASTER_ADMIN' &&
+        resource.data.role != 'MASTER_ADMIN'
+      ) || (
+        isAuthenticated() &&
+        request.auth.uid == employeeUid &&
         request.resource.data.role == resource.data.role &&
         request.resource.data.accountStatus == resource.data.accountStatus
       );
-      allow delete: if isAdmin();
+
+      allow delete: if isMasterAdmin();
     }
 
-    // Customer Visits Collection (Shared records)
-    match /customer_visits/{recordId} {
-      allow read: if isActiveEmployee();
-      allow create: if isActiveEmployee();
-      allow update: if isActiveEmployee();
-      allow delete: if isAdmin();
+    // Branches Collection
+    match /branches/{branchId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Stores Collection
+    match /stores/{storeId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Walk-in Customers Collection
+    match /walkin_customers/{recordId} {
+      allow read: if isActiveUser();
+
+      allow create, update: if isActiveUser();
+
+      // Deletion allowed only for Managers and Admins
+      allow delete: if isManager();
     }
 
     // Customer Visit History
     match /customer_visit_history/{historyId} {
-      allow read: if isActiveEmployee();
-      allow create: if isActiveEmployee();
-      allow update, delete: if isAdmin();
+      allow read: if isActiveUser();
+      allow create: if isActiveUser();
     }
 
-    // Audit Logs
-    match /audit_logs/{logId} {
-      allow read: if isAdmin();
-      allow create: if isActiveEmployee();
-      allow update, delete: if false;
-    }
-
-    // App Settings (Dropdown options)
+    // App Settings Collection
     match /app_settings/{settingId} {
-      allow read: if isActiveEmployee();
+      allow read: if isAuthenticated();
       allow write: if isAdmin();
+    }
+
+    // Audit Logs Collection
+    match /audit_logs/{logId} {
+      allow read: if isManager();
+      allow create: if isActiveUser();
+      allow update, delete: if isMasterAdmin();
     }
   }
 }

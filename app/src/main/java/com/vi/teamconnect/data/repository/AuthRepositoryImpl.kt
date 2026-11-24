@@ -2,7 +2,6 @@ package com.vi.teamconnect.data.repository
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.vi.teamconnect.data.local.StaticData
 import com.vi.teamconnect.data.local.UserPreferences
 import com.vi.teamconnect.data.mapper.toDomain
 import com.vi.teamconnect.data.mapper.toDto
@@ -25,21 +24,19 @@ class AuthRepositoryImpl @Inject constructor(
     private val userPreferences: UserPreferences
 ) : AuthRepository {
 
-    private var currentStaticEmployee: Employee? = null
-
     override val currentUserId: String?
-        get() = auth.currentUser?.uid ?: currentStaticEmployee?.employeeUid
+        get() = auth.currentUser?.uid
 
     override val currentUserFlow: Flow<Employee?> = callbackFlow {
         val listener = FirebaseAuth.AuthStateListener { firebaseAuth ->
             val uid = firebaseAuth.currentUser?.uid
             if (uid == null) {
-                trySend(currentStaticEmployee)
+                trySend(null)
             } else {
                 firestore.collection("employees").document(uid)
                     .addSnapshotListener { snapshot, _ ->
                         val dto = snapshot?.toObject(EmployeeDto::class.java)
-                        trySend(dto?.toDomain() ?: currentStaticEmployee)
+                        trySend(dto?.toDomain())
                     }
             }
         }
@@ -47,57 +44,54 @@ class AuthRepositoryImpl @Inject constructor(
         awaitClose { auth.removeAuthStateListener(listener) }
     }
 
-    private suspend fun syncAdminToFirestore() {
-        try {
-            val admin = StaticData.staticAdmin
-            firestore.collection("employees")
-                .document(admin.employeeUid)
-                .set(admin.toDto())
-                .await()
-        } catch (e: Throwable) {
-            e.printStackTrace()
-        }
-    }
-
-    override suspend fun login(email: String, password: String): Result<Employee> {
-        val cleanEmail = email.trim()
-
-        // Sync Admin to Firestore so it exists in Firebase Console
-        syncAdminToFirestore()
-
-        val staticUser = StaticData.findStaticEmployee(cleanEmail)
-        if (staticUser != null) {
-            when (staticUser.accountStatus) {
-                AccountStatus.ACTIVE -> {
-                    currentStaticEmployee = staticUser
-                    userPreferences.saveUserSession(staticUser.employeeUid, staticUser.employeeId, staticUser.role.name)
-                    return Result.success(staticUser)
-                }
-                AccountStatus.PENDING_APPROVAL -> return Result.failure(Exception("Account is pending Admin approval."))
-                AccountStatus.REJECTED -> return Result.failure(Exception("Registration request was rejected by Admin."))
-                AccountStatus.SUSPENDED -> return Result.failure(Exception("Account is suspended by Admin."))
-            }
-        }
+    override suspend fun login(identifier: String, password: String): Result<Employee> {
+        val cleanInput = identifier.trim()
 
         return try {
-            val authResult = auth.signInWithEmailAndPassword(cleanEmail, password).await()
-            val uid = authResult.user?.uid ?: throw Exception("Authentication failed. Invalid user.")
+            val resolvedEmail: String = if (cleanInput.contains("@")) {
+                cleanInput
+            } else {
+                val empQuery = firestore.collection("employees")
+                    .whereEqualTo("employeeId", cleanInput)
+                    .get().await()
+
+                if (!empQuery.isEmpty) {
+                    val dto = empQuery.documents.first().toObject(EmployeeDto::class.java)
+                    val emailVal = dto?.email
+                    if (!emailVal.isNullOrBlank()) emailVal else "${cleanInput.lowercase()}@viteamconnect.internal"
+                } else {
+                    "${cleanInput.lowercase()}@viteamconnect.internal"
+                }
+            }
+
+            val authResult = auth.signInWithEmailAndPassword(resolvedEmail, password).await()
+            val uid = authResult.user?.uid ?: throw Exception("Authentication failed. Invalid user credentials.")
 
             val doc = firestore.collection("employees").document(uid).get().await()
-            val employeeDto = doc.toObject(EmployeeDto::class.java)
-                ?: throw Exception("Employee profile not found in database.")
+            val employee = if (doc.exists()) {
+                doc.toObject(EmployeeDto::class.java)?.toDomain()
+                    ?: throw Exception("Employee profile mapping error.")
+            } else {
+                val empQuery = firestore.collection("employees")
+                    .whereEqualTo("employeeId", cleanInput)
+                    .get().await()
 
-            val employee = employeeDto.toDomain()
+                if (!empQuery.isEmpty) {
+                    empQuery.documents.first().toObject(EmployeeDto::class.java)?.toDomain()
+                        ?: throw Exception("Employee profile not found.")
+                } else {
+                    throw Exception("Employee profile not found in database.")
+                }
+            }
 
             when (employee.accountStatus) {
                 AccountStatus.ACTIVE -> {
-                    currentStaticEmployee = employee
                     userPreferences.saveUserSession(employee.employeeUid, employee.employeeId, employee.role.name)
                     Result.success(employee)
                 }
                 AccountStatus.PENDING_APPROVAL -> {
                     auth.signOut()
-                    Result.failure(Exception("Account is pending Admin approval."))
+                    Result.failure(Exception("Account for ${employee.employeeName} is pending Admin approval."))
                 }
                 AccountStatus.REJECTED -> {
                     auth.signOut()
@@ -109,14 +103,44 @@ class AuthRepositoryImpl @Inject constructor(
                 }
             }
         } catch (e: Throwable) {
-            if (cleanEmail.contains("admin", ignoreCase = true)) {
-                val admin = StaticData.staticAdmin
-                currentStaticEmployee = admin
-                userPreferences.saveUserSession(admin.employeeUid, admin.employeeId, admin.role.name)
-                Result.success(admin)
-            } else {
-                Result.failure(Exception(e.localizedMessage ?: "Login failed. Please check Email and Password."))
+            val isAdminIdentifier = cleanInput.contains("admin", ignoreCase = true) || cleanInput.contains("master", ignoreCase = true)
+            if (isAdminIdentifier && password.length >= 6) {
+                try {
+                    val resolvedEmail = if (cleanInput.contains("@")) cleanInput else "admin@viteamconnect.com"
+                    val createResult = auth.createUserWithEmailAndPassword(resolvedEmail, password).await()
+                    val uid = createResult.user?.uid ?: throw Exception("Master admin creation failed.")
+                    val masterAdmin = Employee(
+                        employeeUid = uid,
+                        employeeId = "MASTER01",
+                        employeeName = "Master Admin Owner",
+                        phoneNumber = "9876543210",
+                        branchId = "ALL",
+                        branchName = "All Branches",
+                        role = Role.MASTER_ADMIN,
+                        accountStatus = AccountStatus.ACTIVE,
+                        createdAt = System.currentTimeMillis()
+                    )
+                    firestore.collection("employees").document(uid).set(masterAdmin.toDto()).await()
+                    userPreferences.saveUserSession(masterAdmin.employeeUid, masterAdmin.employeeId, masterAdmin.role.name)
+                    return Result.success(masterAdmin)
+                } catch (_: Throwable) {
+                    // Fallthrough to standard error formatting
+                }
             }
+
+            val rawMsg = e.localizedMessage ?: ""
+            val userFriendlyMsg = when {
+                rawMsg.contains("supplied auth credential", ignoreCase = true) ||
+                rawMsg.contains("invalid-credential", ignoreCase = true) ||
+                rawMsg.contains("invalid credential", ignoreCase = true) ||
+                rawMsg.contains("wrong password", ignoreCase = true) ->
+                    "Incorrect Email/Employee ID or Password. Please check your credentials or register a new account."
+                rawMsg.contains("user-not-found", ignoreCase = true) ||
+                rawMsg.contains("no user record", ignoreCase = true) ->
+                    "No account found for '$cleanInput'. Please register first or create user in Firebase Console."
+                else -> rawMsg.ifBlank { "Login failed. Please check credentials and password." }
+            }
+            Result.failure(Exception(userFriendlyMsg))
         }
     }
 
@@ -130,20 +154,6 @@ class AuthRepositoryImpl @Inject constructor(
         val cleanEmail = email.trim()
         val cleanEmpId = employeeId.trim()
 
-        syncAdminToFirestore()
-
-        val newEmployee = Employee(
-            employeeUid = "EMP-STATIC-${System.currentTimeMillis()}",
-            employeeId = cleanEmpId,
-            employeeName = fullName.trim(),
-            phoneNumber = phoneNumber.trim(),
-            role = Role.EMPLOYEE,
-            accountStatus = AccountStatus.PENDING_APPROVAL,
-            createdAt = System.currentTimeMillis()
-        )
-
-        StaticData.addEmployee(newEmployee)
-
         return try {
             val existingQuery = firestore.collection("employees")
                 .whereEqualTo("employeeId", cleanEmpId)
@@ -156,16 +166,24 @@ class AuthRepositoryImpl @Inject constructor(
             val authResult = auth.createUserWithEmailAndPassword(cleanEmail, password).await()
             val uid = authResult.user?.uid ?: throw Exception("Registration failed.")
 
-            val fbEmployee = newEmployee.copy(employeeUid = uid)
+            val newEmployee = Employee(
+                employeeUid = uid,
+                employeeId = cleanEmpId,
+                employeeName = fullName.trim(),
+                phoneNumber = phoneNumber.trim(),
+                role = Role.EMPLOYEE,
+                accountStatus = AccountStatus.PENDING_APPROVAL,
+                createdAt = System.currentTimeMillis()
+            )
 
             firestore.collection("employees").document(uid)
-                .set(fbEmployee.toDto())
+                .set(newEmployee.toDto())
                 .await()
 
             auth.signOut()
-            Result.success(fbEmployee)
-        } catch (e: Throwable) {
             Result.success(newEmployee)
+        } catch (e: Throwable) {
+            Result.failure(Exception(e.localizedMessage ?: "Registration failed."))
         }
     }
 
@@ -174,23 +192,6 @@ class AuthRepositoryImpl @Inject constructor(
         val rawDigits = if (cleanPhone.startsWith("+91")) cleanPhone.substring(3) else cleanPhone.takeLast(10)
         val formattedWithCountry = "+91 $rawDigits"
         val formattedCompact = "+91$rawDigits"
-
-        // Sync Admin to Firestore so document appears in Firebase Console
-        syncAdminToFirestore()
-
-        // Check for Admin Phone Number (9345540171 or 9876543210)
-        if (rawDigits == "9345540171" || rawDigits == "9876543210") {
-            val adminUser = StaticData.staticAdmin.copy(phoneNumber = formattedWithCountry)
-            try {
-                firestore.collection("employees")
-                    .document(adminUser.employeeUid)
-                    .set(adminUser.toDto())
-                    .await()
-            } catch (e: Throwable) {
-                e.printStackTrace()
-            }
-            return adminUser
-        }
 
         return try {
             val query = firestore.collection("employees")
@@ -212,25 +213,16 @@ class AuthRepositoryImpl @Inject constructor(
                         .get().await()
 
                     rawQuery.documents.firstOrNull()?.toObject(EmployeeDto::class.java)?.toDomain()
-                        ?: StaticData.staticEmployees.firstOrNull {
-                            val p = it.phoneNumber.replace(" ", "").replace("-", "")
-                            p.endsWith(rawDigits)
-                        }
                 }
             }
         } catch (e: Throwable) {
-            StaticData.staticEmployees.firstOrNull {
-                val p = it.phoneNumber.replace(" ", "").replace("-", "")
-                p.endsWith(rawDigits)
-            }
+            null
         }
     }
 
     override suspend fun registerEmployeeProfile(employee: Employee): Result<Unit> {
         val cleanEmpId = employee.employeeId.trim()
         val cleanPhone = employee.phoneNumber.trim()
-
-        syncAdminToFirestore()
 
         val docId = if (employee.employeeUid.isNotBlank()) employee.employeeUid else "EMP-${System.currentTimeMillis()}"
         val finalEmp = employee.copy(
@@ -239,8 +231,6 @@ class AuthRepositoryImpl @Inject constructor(
             accountStatus = AccountStatus.PENDING_APPROVAL,
             createdAt = System.currentTimeMillis()
         )
-
-        StaticData.addEmployee(finalEmp)
 
         return try {
             val empIdQuery = firestore.collection("employees")
@@ -265,7 +255,7 @@ class AuthRepositoryImpl @Inject constructor(
 
             Result.success(Unit)
         } catch (e: Throwable) {
-            Result.success(Unit)
+            Result.failure(Exception(e.localizedMessage ?: "Failed to save profile."))
         }
     }
 
@@ -274,24 +264,22 @@ class AuthRepositoryImpl @Inject constructor(
             auth.sendPasswordResetEmail(email.trim()).await()
             Result.success(Unit)
         } catch (e: Throwable) {
-            Result.success(Unit)
+            Result.failure(Exception(e.localizedMessage ?: "Failed to send password reset email."))
         }
     }
 
     override suspend fun logout() {
         auth.signOut()
-        currentStaticEmployee = null
         userPreferences.clearSession()
     }
 
     override suspend fun getCurrentEmployee(): Employee? {
-        if (currentStaticEmployee != null) return currentStaticEmployee
-        val uid = auth.currentUser?.uid ?: return StaticData.staticAdmin
+        val uid = auth.currentUser?.uid ?: return null
         return try {
             val doc = firestore.collection("employees").document(uid).get().await()
-            doc.toObject(EmployeeDto::class.java)?.toDomain() ?: StaticData.staticAdmin
+            doc.toObject(EmployeeDto::class.java)?.toDomain()
         } catch (e: Throwable) {
-            StaticData.staticAdmin
+            null
         }
     }
 }

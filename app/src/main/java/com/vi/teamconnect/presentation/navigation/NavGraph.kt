@@ -14,6 +14,7 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -57,6 +58,8 @@ import com.vi.teamconnect.presentation.theme.PrimaryBackground
 import com.vi.teamconnect.presentation.theme.SecondaryGrey
 import com.vi.teamconnect.presentation.theme.SoftGoldHighlight
 
+import com.vi.teamconnect.domain.model.Role
+
 data class BottomNavItem(
     val title: String,
     val route: String,
@@ -74,12 +77,22 @@ val bottomNavItems = listOf(
 @Composable
 fun MainAppNavigation(
     navController: NavHostController = rememberNavController(),
-    startDestination: String = Screen.Home.route
+    startDestination: String = Screen.Home.route,
+    mainViewModel: MainViewModel = hiltViewModel()
 ) {
+    val currentUser by mainViewModel.currentUser.collectAsState()
+    val isMasterOrAdmin = currentUser?.role == Role.MASTER_ADMIN || currentUser?.role == Role.ADMIN
+
+    val visibleNavItems = if (isMasterOrAdmin) {
+        bottomNavItems
+    } else {
+        bottomNavItems.filter { it.route != Screen.EmployeeManagement.route }
+    }
+
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    val showBottomBar = currentRoute in bottomNavItems.map { it.route }
+    val showBottomBar = currentRoute in visibleNavItems.map { it.route }
 
     Scaffold(
         bottomBar = {
@@ -88,7 +101,7 @@ fun MainAppNavigation(
                     containerColor = PrimaryBackground,
                     tonalElevation = 8.dp
                 ) {
-                    bottomNavItems.forEach { item ->
+                    visibleNavItems.forEach { item ->
                         val selected = currentRoute == item.route
                         NavigationBarItem(
                             icon = { Icon(item.icon, contentDescription = item.title) },

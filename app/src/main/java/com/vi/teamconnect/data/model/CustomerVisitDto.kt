@@ -10,6 +10,7 @@ data class CustomerVisitDto(
     @get:PropertyName("branchName") @set:PropertyName("branchName") var branchName: String = "",
     @get:PropertyName("date") @set:PropertyName("date") var date: String = "",
     @get:PropertyName("creUid") @set:PropertyName("creUid") var creUid: String = "",
+    @get:PropertyName("creEmployeeId") @set:PropertyName("creEmployeeId") var creEmployeeId: String? = null,
     @get:PropertyName("creName") @set:PropertyName("creName") var creName: String = "",
     @get:PropertyName("customerName") @set:PropertyName("customerName") var customerName: String = "",
     @get:PropertyName("mobileNumber") @set:PropertyName("mobileNumber") var mobileNumber: String = "",
@@ -25,11 +26,21 @@ data class CustomerVisitDto(
     @get:PropertyName("updatedBy") @set:PropertyName("updatedBy") var updatedBy: String = "",
     @get:PropertyName("updatedAt") @set:PropertyName("updatedAt") var updatedAt: Any? = null,
     @get:PropertyName("isDeleted") @set:PropertyName("isDeleted") var isDeleted: Boolean = false,
+    @get:PropertyName("deletedBy") @set:PropertyName("deletedBy") var deletedBy: Any? = null,
+    @get:PropertyName("deletedAt") @set:PropertyName("deletedAt") var deletedAt: Any? = null,
 
     // Legacy fallbacks
     @get:PropertyName("cusName") @set:PropertyName("cusName") var cusName: String? = null,
     @get:PropertyName("mobNo") @set:PropertyName("mobNo") var mobNo: String? = null,
     @get:PropertyName("prePp") @set:PropertyName("prePp") var prePp: String? = null,
     @get:PropertyName("alterNo") @set:PropertyName("alterNo") var alterNo: String? = null,
-    @get:PropertyName("purposeOfVisit") @set:PropertyName("purposeOfVisit") var purposeOfVisit: String? = null
+    @get:PropertyName("purposeOfVisit") @set:PropertyName("purposeOfVisit") var purposeOfVisit: String? = null,
+    @get:PropertyName("did") @set:PropertyName("did") var did: String? = null,
+    @get:PropertyName("gbp") @set:PropertyName("gbp") var gbp: String? = null,
+    @get:PropertyName("happyCalling") @set:PropertyName("happyCalling") var happyCalling: String? = null,
+    @get:PropertyName("operator") @set:PropertyName("operator") var operator: String? = null,
+    @get:PropertyName("refferel") @set:PropertyName("refferel") var refferel: String? = null,
+    @get:PropertyName("remarks") @set:PropertyName("remarks") var remarks: String? = null,
+    @get:PropertyName("srNo") @set:PropertyName("srNo") var srNo: String? = null,
+    @get:PropertyName("token") @set:PropertyName("token") var token: String? = null
 )

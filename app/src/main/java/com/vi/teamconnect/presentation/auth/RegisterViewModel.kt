@@ -9,7 +9,6 @@ import com.vi.teamconnect.domain.model.Role
 import com.vi.teamconnect.domain.repository.AuthRepository
 import com.vi.teamconnect.domain.repository.BranchRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,6 +17,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class RegisterUiState(
+    val email: String = "",
     val employeeId: String = "",
     val employeeName: String = "",
     val phoneNumber: String = "",
@@ -25,8 +25,6 @@ data class RegisterUiState(
     val confirmPassword: String = "",
     val selectedBranch: Branch? = null,
     val branches: List<Branch> = emptyList(),
-    val isOtpSent: Boolean = false,
-    val otpCode: String = "",
     val isPasswordVisible: Boolean = false,
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
@@ -66,20 +64,21 @@ class RegisterViewModel @Inject constructor(
         }
     }
 
+    fun onEmailChanged(email: String) { _uiState.update { it.copy(email = email, errorMessage = null) } }
     fun onEmployeeIdChanged(id: String) { _uiState.update { it.copy(employeeId = id, errorMessage = null) } }
     fun onEmployeeNameChanged(name: String) { _uiState.update { it.copy(employeeName = name, errorMessage = null) } }
     fun onPhoneNumberChanged(phone: String) { _uiState.update { it.copy(phoneNumber = phone, errorMessage = null) } }
     fun onPasswordChanged(pwd: String) { _uiState.update { it.copy(password = pwd, errorMessage = null) } }
     fun onConfirmPasswordChanged(pwd: String) { _uiState.update { it.copy(confirmPassword = pwd, errorMessage = null) } }
     fun onBranchSelected(branch: Branch) { _uiState.update { it.copy(selectedBranch = branch, errorMessage = null) } }
-    fun onOtpCodeChanged(code: String) { _uiState.update { it.copy(otpCode = code, errorMessage = null) } }
     fun togglePasswordVisibility() { _uiState.update { it.copy(isPasswordVisible = !it.isPasswordVisible) } }
 
-    fun register() = sendOtp()
-
-    fun sendOtp() {
+    fun register() {
         val state = _uiState.value
-        if (state.employeeId.isBlank()) {
+        val cleanEmpId = state.employeeId.trim()
+        val cleanEmail = if (state.email.isNotBlank()) state.email.trim() else "${cleanEmpId.lowercase()}@viteamconnect.internal"
+
+        if (cleanEmpId.isBlank()) {
             _uiState.update { it.copy(errorMessage = "Employee ID is required.") }
             return
         }
@@ -107,59 +106,21 @@ class RegisterViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
-            val existingPhoneUser = authRepository.getEmployeeByPhone(state.phoneNumber.trim())
-            if (existingPhoneUser != null) {
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        errorMessage = "Phone number ${state.phoneNumber.trim()} is already registered."
-                    )
-                }
-                return@launch
-            }
-
-            delay(800) // Simulate Phone Auth SMS OTP trigger
-            _uiState.update {
-                it.copy(
-                    isLoading = false,
-                    isOtpSent = true,
-                    errorMessage = null,
-                    successMessage = "OTP sent successfully to +91 ${state.phoneNumber.takeLast(4).padStart(10, '*')}. Enter 6-digit OTP code below (Test OTP: 123456)."
-                )
-            }
-        }
-    }
-
-    fun verifyOtpAndRegister() {
-        val state = _uiState.value
-        if (state.otpCode.isBlank() || state.otpCode.length < 4) {
-            _uiState.update { it.copy(errorMessage = "Please enter the complete OTP code.") }
-            return
-        }
-
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
-
-            val newEmployee = Employee(
-                employeeUid = "",
-                employeeId = state.employeeId.trim(),
-                employeeName = state.employeeName.trim(),
+            val result = authRepository.register(
+                email = cleanEmail,
+                employeeId = cleanEmpId,
+                fullName = state.employeeName.trim(),
                 phoneNumber = state.phoneNumber.trim(),
-                branchId = state.selectedBranch?.branchId ?: "BRANCH-HQ-01",
-                branchName = state.selectedBranch?.branchName ?: "Central HQ",
-                role = Role.EMPLOYEE,
-                accountStatus = AccountStatus.PENDING_APPROVAL,
-                createdAt = System.currentTimeMillis()
+                password = state.password
             )
 
-            val result = authRepository.registerEmployeeProfile(newEmployee)
             result.fold(
                 onSuccess = {
                     _uiState.update {
                         it.copy(
                             isLoading = false,
                             isRegistrationSuccess = true,
-                            successMessage = "Phone Number Verified & Registration Submitted Successfully!\n\nStatus: PENDING ADMIN APPROVAL\n\nAn administrator must approve your account before access is granted."
+                            successMessage = "Registration Submitted Successfully!\n\nStatus: PENDING ADMIN APPROVAL\n\nAn administrator must approve your account before access is granted."
                         )
                     }
                 },
@@ -168,9 +129,5 @@ class RegisterViewModel @Inject constructor(
                 }
             )
         }
-    }
-
-    fun resetOtpStep() {
-        _uiState.update { it.copy(isOtpSent = false, otpCode = "", errorMessage = null) }
     }
 }

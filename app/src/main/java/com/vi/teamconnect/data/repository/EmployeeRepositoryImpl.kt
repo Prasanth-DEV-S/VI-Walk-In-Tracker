@@ -1,7 +1,7 @@
 package com.vi.teamconnect.data.repository
 
 import com.google.firebase.firestore.FirebaseFirestore
-import com.vi.teamconnect.data.local.StaticData
+import com.google.firebase.firestore.SetOptions
 import com.vi.teamconnect.data.mapper.toDomain
 import com.vi.teamconnect.data.model.EmployeeDto
 import com.vi.teamconnect.domain.model.AccountStatus
@@ -25,14 +25,19 @@ class EmployeeRepositoryImpl @Inject constructor(
             .addSnapshotListener { snapshot, _ ->
                 val firestoreList = snapshot?.documents?.mapNotNull { doc ->
                     try {
-                        doc.toObject(EmployeeDto::class.java)?.toDomain()
+                        val dto = doc.toObject(EmployeeDto::class.java)
+                        val domain = dto?.toDomain()
+                        if (domain != null && domain.employeeUid.isBlank()) {
+                            domain.copy(employeeUid = doc.id)
+                        } else {
+                            domain
+                        }
                     } catch (e: Exception) {
                         null
                     }
                 } ?: emptyList()
 
-                val combined = (firestoreList + StaticData.staticEmployees).distinctBy { it.employeeUid }
-                trySend(combined)
+                trySend(firestoreList)
             }
         awaitClose { listener.remove() }
     }
@@ -43,105 +48,122 @@ class EmployeeRepositoryImpl @Inject constructor(
             .addSnapshotListener { snapshot, _ ->
                 val firestoreList = snapshot?.documents?.mapNotNull { doc ->
                     try {
-                        doc.toObject(EmployeeDto::class.java)?.toDomain()
+                        val dto = doc.toObject(EmployeeDto::class.java)
+                        val domain = dto?.toDomain()
+                        if (domain != null && domain.employeeUid.isBlank()) {
+                            domain.copy(employeeUid = doc.id)
+                        } else {
+                            domain
+                        }
                     } catch (e: Exception) {
                         null
                     }
                 } ?: emptyList()
 
-                val combined = (firestoreList + StaticData.staticEmployees.filter { it.branchId == branchId })
-                    .distinctBy { it.employeeUid }
-                trySend(combined)
+                trySend(firestoreList)
             }
         awaitClose { listener.remove() }
     }
 
     override fun getPendingApprovalEmployees(): Flow<List<Employee>> = callbackFlow {
         val listener = firestore.collection("employees")
-            .whereEqualTo("accountStatus", AccountStatus.PENDING_APPROVAL.name)
             .addSnapshotListener { snapshot, _ ->
                 val firestoreList = snapshot?.documents?.mapNotNull { doc ->
                     try {
-                        doc.toObject(EmployeeDto::class.java)?.toDomain()
+                        val dto = doc.toObject(EmployeeDto::class.java)
+                        val domain = dto?.toDomain()
+                        val finalEmp = if (domain != null && domain.employeeUid.isBlank()) {
+                            domain.copy(employeeUid = doc.id)
+                        } else {
+                            domain
+                        }
+                        if (finalEmp?.accountStatus == AccountStatus.PENDING_APPROVAL) finalEmp else null
                     } catch (e: Exception) {
                         null
                     }
                 } ?: emptyList()
 
-                val combined = (firestoreList + StaticData.staticEmployees.filter { it.accountStatus == AccountStatus.PENDING_APPROVAL })
-                    .distinctBy { it.employeeUid }
-                trySend(combined)
+                trySend(firestoreList)
             }
         awaitClose { listener.remove() }
     }
 
     override suspend fun approveEmployee(uid: String, adminName: String): Result<Unit> {
-        StaticData.approveEmployee(uid, adminName)
         return try {
             firestore.collection("employees")
                 .document(uid)
-                .update(
+                .set(
                     mapOf(
                         "accountStatus" to AccountStatus.ACTIVE.name,
+                        "status" to AccountStatus.ACTIVE.name,
                         "approvedAt" to System.currentTimeMillis(),
                         "approvedBy" to adminName
-                    )
+                    ),
+                    SetOptions.merge()
                 ).await()
 
             Result.success(Unit)
-        } catch (_: Exception) {
-            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
 
     override suspend fun rejectEmployee(uid: String): Result<Unit> {
-        StaticData.rejectEmployee(uid)
         return try {
             firestore.collection("employees")
                 .document(uid)
-                .update("accountStatus", AccountStatus.REJECTED.name)
-                .await()
+                .set(
+                    mapOf(
+                        "accountStatus" to AccountStatus.REJECTED.name,
+                        "status" to AccountStatus.REJECTED.name
+                    ),
+                    SetOptions.merge()
+                ).await()
 
             Result.success(Unit)
-        } catch (_: Exception) {
-            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
 
     override suspend fun updateEmployeeRole(uid: String, role: Role): Result<Unit> {
-        StaticData.updateEmployeeRole(uid, role)
         return try {
             firestore.collection("employees")
                 .document(uid)
-                .update("role", role.name)
-                .await()
+                .set(
+                    mapOf("role" to role.name),
+                    SetOptions.merge()
+                ).await()
 
             Result.success(Unit)
-        } catch (_: Exception) {
-            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
 
     override suspend fun updateEmployeeStatus(uid: String, status: AccountStatus): Result<Unit> {
-        StaticData.updateEmployeeStatus(uid, status)
         return try {
             firestore.collection("employees")
                 .document(uid)
-                .update("accountStatus", status.name)
-                .await()
+                .set(
+                    mapOf(
+                        "accountStatus" to status.name,
+                        "status" to status.name
+                    ),
+                    SetOptions.merge()
+                ).await()
 
             Result.success(Unit)
-        } catch (_: Exception) {
-            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
 
     override suspend fun updateEmployeeProfile(employee: Employee): Result<Unit> {
-        StaticData.updateEmployeeProfile(employee)
         return try {
             firestore.collection("employees")
                 .document(employee.employeeUid)
-                .update(
+                .set(
                     mapOf(
                         "employeeName" to employee.employeeName,
                         "phoneNumber" to employee.phoneNumber,
@@ -149,12 +171,13 @@ class EmployeeRepositoryImpl @Inject constructor(
                         "branchId" to employee.branchId,
                         "branchName" to employee.branchName,
                         "fullName" to employee.employeeName
-                    )
+                    ),
+                    SetOptions.merge()
                 ).await()
 
             Result.success(Unit)
-        } catch (_: Exception) {
-            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
 }

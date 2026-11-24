@@ -141,7 +141,7 @@ fun Store.toDto(): StoreDto {
 fun CustomerVisitDto.toDomain(): CustomerVisit {
     val finalCusName = if (customerName.isNotBlank()) customerName else (cusName ?: "")
     val finalMob = if (mobileNumber.isNotBlank()) mobileNumber else (mobNo ?: "")
-    val finalPrePost = if (prePost.isNotBlank()) {
+    val finalPrePost = if (prePost.isNotBlank() && !prePost.equals("PREPAID", ignoreCase = true)) {
         prePost
     } else if (prePp.equals("PP", ignoreCase = true) || prePp.equals("POSTPAID", ignoreCase = true)) {
         "POSTPAID"
@@ -149,7 +149,8 @@ fun CustomerVisitDto.toDomain(): CustomerVisit {
         "PREPAID"
     }
     val finalAlt = if (altNumber.isNotBlank()) altNumber else (alterNo ?: "")
-    val finalReason = if (reasonForVisit.isNotBlank()) reasonForVisit else (purposeOfVisit ?: "")
+    val finalReason = if (reasonForVisit.isNotBlank()) reasonForVisit else (purposeOfVisit ?: remarks ?: "")
+    val finalCreUid = if (creUid.isNotBlank()) creUid else (creEmployeeId ?: "")
 
     return CustomerVisit(
         recordId = recordId,
@@ -158,14 +159,14 @@ fun CustomerVisitDto.toDomain(): CustomerVisit {
         branchId = branchId,
         branchName = branchName,
         date = date,
-        creUid = creUid,
+        creUid = finalCreUid,
         creName = creName,
         customerName = finalCusName,
         mobileNumber = finalMob,
         prePost = finalPrePost,
         altNumber = finalAlt,
         reasonForVisit = finalReason,
-        gmb = gmb,
+        gmb = if (gmb.isNotBlank() && gmb != "NO") gmb else (gbp ?: "NO"),
         tagging = tagging,
         createdBy = createdBy,
         createdAt = parseTimestamp(createdAt),

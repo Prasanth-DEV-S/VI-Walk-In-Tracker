@@ -4,7 +4,8 @@ enum class Role {
     EMPLOYEE,
     TL,
     MANAGER,
-    ADMIN
+    ADMIN,
+    MASTER_ADMIN
 }
 
 enum class AccountStatus {

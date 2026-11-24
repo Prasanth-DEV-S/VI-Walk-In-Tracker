@@ -2,7 +2,6 @@ package com.vi.teamconnect.data.repository
 
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
-import com.vi.teamconnect.data.local.StaticData
 import com.vi.teamconnect.data.mapper.toDomain
 import com.vi.teamconnect.data.mapper.toDto
 import com.vi.teamconnect.data.model.CustomerVisitDto
@@ -46,7 +45,7 @@ class CustomerRepositoryImpl @Inject constructor(
                     }
                 } ?: emptyList()
 
-                var domainList = (dtos.map { it.toDomain() } + StaticData.staticCustomerVisits).distinctBy { it.recordId }
+                var domainList = dtos.map { it.toDomain() }
 
                 // Apply Search Filter
                 if (filter.searchQuery.isNotBlank()) {
@@ -130,7 +129,7 @@ class CustomerRepositoryImpl @Inject constructor(
                 } catch (e: Exception) {
                     null
                 }
-                val domain = dto?.toDomain() ?: StaticData.staticCustomerVisits.find { it.recordId == recordId }
+                val domain = dto?.toDomain()
                 trySend(domain)
             }
         awaitClose { listener.remove() }
@@ -150,7 +149,7 @@ class CustomerRepositoryImpl @Inject constructor(
                     }
                 } ?: emptyList()
 
-                visits = (visits + StaticData.staticCustomerVisits).distinctBy { it.recordId }
+
 
                 if (!branchId.isNullOrBlank()) {
                     visits = visits.filter { it.branchId == branchId }
@@ -200,7 +199,7 @@ class CustomerRepositoryImpl @Inject constructor(
                     }
                 } ?: emptyList()
 
-                visits = (visits + StaticData.staticCustomerVisits).distinctBy { it.recordId }
+
 
                 if (startDate.isNotBlank()) visits = visits.filter { it.date >= startDate }
                 if (endDate.isNotBlank()) visits = visits.filter { it.date <= endDate }
@@ -243,7 +242,7 @@ class CustomerRepositoryImpl @Inject constructor(
                     }
                 } ?: emptyList()
 
-                visits = (visits + StaticData.staticCustomerVisits).distinctBy { it.recordId }
+
 
                 if (branchId.isNotBlank()) visits = visits.filter { it.branchId == branchId }
                 if (startDate.isNotBlank()) visits = visits.filter { it.date >= startDate }

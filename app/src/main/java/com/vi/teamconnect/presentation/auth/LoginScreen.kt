@@ -14,10 +14,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Badge
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Phone
-import androidx.compose.material.icons.filled.Pin
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Card
@@ -107,133 +105,70 @@ fun LoginScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = if (uiState.isPasswordLoginMode) "Password Login" else "Phone OTP Login",
+                        text = "User Login",
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                         color = DarkCharcoal,
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
 
-                    if (!uiState.isPasswordLoginMode) {
-                        if (!uiState.isOtpSent) {
-                            GoldOutlinedTextField(
-                                value = uiState.phoneNumber,
-                                onValueChange = viewModel::onPhoneNumberChanged,
-                                label = "Registered Phone Number",
-                                trailingIcon = {
-                                    Icon(
-                                        imageVector = Icons.Default.Phone,
-                                        contentDescription = null,
-                                        tint = PrimaryGold
-                                    )
-                                }
+                    GoldOutlinedTextField(
+                        value = uiState.identifier,
+                        onValueChange = viewModel::onIdentifierChanged,
+                        label = "Email / Employee ID",
+                        trailingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Badge,
+                                contentDescription = null,
+                                tint = PrimaryGold
                             )
-
-                            Spacer(modifier = Modifier.height(16.dp))
-
-                            GoldGradientButton(
-                                text = "SEND OTP",
-                                onClick = viewModel::sendOtp,
-                                isLoading = uiState.isLoading,
-                                modifier = Modifier.fillMaxWidth().height(48.dp)
-                            )
-                        } else {
-                            Text(
-                                text = "Enter OTP sent to +91 ${uiState.phoneNumber}",
-                                fontSize = 13.sp,
-                                color = SecondaryGrey,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.padding(bottom = 12.dp)
-                            )
-
-                            GoldOutlinedTextField(
-                                value = uiState.otpCode,
-                                onValueChange = viewModel::onOtpCodeChanged,
-                                label = "6-Digit OTP Code",
-                                trailingIcon = {
-                                    Icon(
-                                        imageVector = Icons.Default.Pin,
-                                        contentDescription = null,
-                                        tint = PrimaryGold
-                                    )
-                                }
-                            )
-
-                            Spacer(modifier = Modifier.height(16.dp))
-
-                            GoldGradientButton(
-                                text = "VERIFY OTP",
-                                onClick = viewModel::verifyOtp,
-                                isLoading = uiState.isLoading,
-                                modifier = Modifier.fillMaxWidth().height(48.dp)
-                            )
-
-                            TextButton(
-                                onClick = viewModel::resetOtpState,
-                                modifier = Modifier.padding(top = 4.dp)
-                            ) {
-                                Text("Change Phone Number", color = DeepGold, fontSize = 13.sp)
-                            }
                         }
-                    } else {
-                        GoldOutlinedTextField(
-                            value = uiState.email,
-                            onValueChange = viewModel::onEmailChanged,
-                            label = "Email / Employee ID",
-                            trailingIcon = {
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    OutlinedTextField(
+                        value = uiState.password,
+                        onValueChange = viewModel::onPasswordChanged,
+                        label = { Text("Password") },
+                        leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = PrimaryGold) },
+                        trailingIcon = {
+                            IconButton(onClick = viewModel::togglePasswordVisibility) {
                                 Icon(
-                                    imageVector = Icons.Default.Email,
-                                    contentDescription = null,
-                                    tint = PrimaryGold
+                                    imageVector = if (uiState.isPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                                    contentDescription = "Toggle Password",
+                                    tint = DeepGold
                                 )
                             }
-                        )
+                        },
+                        visualTransformation = if (uiState.isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = PrimaryGold,
+                            unfocusedBorderColor = LightGoldBorder
+                        ),
+                        shape = RoundedCornerShape(10.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    )
 
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        OutlinedTextField(
-                            value = uiState.password,
-                            onValueChange = viewModel::onPasswordChanged,
-                            label = { Text("Password") },
-                            leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = PrimaryGold) },
-                            trailingIcon = {
-                                IconButton(onClick = viewModel::togglePasswordVisibility) {
-                                    Icon(
-                                        imageVector = if (uiState.isPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                                        contentDescription = "Toggle Password",
-                                        tint = DeepGold
-                                    )
-                                }
-                            },
-                            visualTransformation = if (uiState.isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                            singleLine = true,
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = PrimaryGold,
-                                unfocusedBorderColor = LightGoldBorder
-                            ),
-                            shape = RoundedCornerShape(10.dp),
-                            modifier = Modifier.fillMaxWidth()
-                        )
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.End
-                        ) {
-                            TextButton(onClick = onNavigateToForgotPassword) {
-                                Text("Forgot Password?", color = DeepGold, fontSize = 13.sp)
-                            }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        TextButton(onClick = onNavigateToForgotPassword) {
+                            Text("Forgot Password?", color = DeepGold, fontSize = 13.sp)
                         }
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        GoldGradientButton(
-                            text = "LOGIN",
-                            onClick = viewModel::loginWithPassword,
-                            isLoading = uiState.isLoading,
-                            modifier = Modifier.fillMaxWidth().height(48.dp)
-                        )
                     }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    GoldGradientButton(
+                        text = "LOGIN",
+                        onClick = viewModel::login,
+                        isLoading = uiState.isLoading,
+                        modifier = Modifier.fillMaxWidth().height(48.dp)
+                    )
 
                     if (uiState.infoMessage != null) {
                         Box(
@@ -264,17 +199,6 @@ fun LoginScreen(
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
-
-                    TextButton(onClick = viewModel::toggleLoginMode) {
-                        Text(
-                            text = if (uiState.isPasswordLoginMode) "Use Phone OTP Login" else "Use Password Login",
-                            color = DeepGold,
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 13.sp
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(4.dp))
 
                     Row(
                         verticalAlignment = Alignment.CenterVertically
