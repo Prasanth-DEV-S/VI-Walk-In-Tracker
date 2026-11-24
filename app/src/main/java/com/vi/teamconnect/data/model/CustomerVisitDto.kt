@@ -17,6 +17,7 @@ data class CustomerVisitDto(
     @get:PropertyName("prePost") @set:PropertyName("prePost") var prePost: String = "PREPAID",
     @get:PropertyName("altNumber") @set:PropertyName("altNumber") var altNumber: String = "",
     @get:PropertyName("reasonForVisit") @set:PropertyName("reasonForVisit") var reasonForVisit: String = "",
+    @get:PropertyName("remarks") @set:PropertyName("remarks") var remarks: String = "",
     @get:PropertyName("gmb") @set:PropertyName("gmb") var gmb: String = "NO",
     @get:PropertyName("tagging") @set:PropertyName("tagging") var tagging: String = "NO",
 
@@ -40,7 +41,6 @@ data class CustomerVisitDto(
     @get:PropertyName("happyCalling") @set:PropertyName("happyCalling") var happyCalling: String? = null,
     @get:PropertyName("operator") @set:PropertyName("operator") var operator: String? = null,
     @get:PropertyName("refferel") @set:PropertyName("refferel") var refferel: String? = null,
-    @get:PropertyName("remarks") @set:PropertyName("remarks") var remarks: String? = null,
     @get:PropertyName("srNo") @set:PropertyName("srNo") var srNo: String? = null,
     @get:PropertyName("token") @set:PropertyName("token") var token: String? = null
 )

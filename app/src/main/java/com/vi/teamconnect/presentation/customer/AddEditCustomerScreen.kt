@@ -163,6 +163,15 @@ fun AddEditCustomerScreen(
 
             Spacer(modifier = Modifier.height(10.dp))
 
+            // Remarks / Notes
+            GoldOutlinedTextField(
+                value = uiState.remarks,
+                onValueChange = viewModel::onRemarksChanged,
+                label = "Remarks / Notes"
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
             // 9. GMB Status
             Text("9. GMB *", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = DarkCharcoal)
             Row(verticalAlignment = Alignment.CenterVertically) {

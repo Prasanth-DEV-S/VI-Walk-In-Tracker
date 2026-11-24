@@ -149,7 +149,8 @@ fun CustomerVisitDto.toDomain(): CustomerVisit {
         "PREPAID"
     }
     val finalAlt = if (altNumber.isNotBlank()) altNumber else (alterNo ?: "")
-    val finalReason = if (reasonForVisit.isNotBlank()) reasonForVisit else (purposeOfVisit ?: remarks ?: "")
+    val finalReason = if (reasonForVisit.isNotBlank()) reasonForVisit else (purposeOfVisit ?: "")
+    val finalRemarks = if (remarks.isNotBlank()) remarks else ""
     val finalCreUid = if (creUid.isNotBlank()) creUid else (creEmployeeId ?: "")
 
     return CustomerVisit(
@@ -166,6 +167,7 @@ fun CustomerVisitDto.toDomain(): CustomerVisit {
         prePost = finalPrePost,
         altNumber = finalAlt,
         reasonForVisit = finalReason,
+        remarks = finalRemarks,
         gmb = if (gmb.isNotBlank() && gmb != "NO") gmb else (gbp ?: "NO"),
         tagging = tagging,
         createdBy = createdBy,
@@ -191,6 +193,7 @@ fun CustomerVisit.toDto(): CustomerVisitDto {
         prePost = prePost,
         altNumber = altNumber,
         reasonForVisit = reasonForVisit,
+        remarks = remarks,
         gmb = gmb,
         tagging = tagging,
         createdBy = createdBy,

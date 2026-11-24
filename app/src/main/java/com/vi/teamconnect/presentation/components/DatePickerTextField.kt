@@ -3,6 +3,7 @@ package com.vi.teamconnect.presentation.components
 import android.app.DatePickerDialog
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.Icon
@@ -13,9 +14,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import com.vi.teamconnect.presentation.theme.DarkCharcoal
-import com.vi.teamconnect.presentation.theme.LightGoldBorder
-import com.vi.teamconnect.presentation.theme.PrimaryGold
+import androidx.compose.ui.unit.dp
+import com.vi.teamconnect.presentation.theme.BorderColor
+import com.vi.teamconnect.presentation.theme.SecondaryText
+import com.vi.teamconnect.presentation.theme.ViRedPrimary
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -53,18 +55,19 @@ fun DatePickerTextField(
             Icon(
                 imageVector = Icons.Default.DateRange,
                 contentDescription = "Select Date",
-                tint = PrimaryGold,
+                tint = ViRedPrimary,
                 modifier = Modifier.clickable { datePickerDialog.show() }
             )
         },
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = PrimaryGold,
-            unfocusedBorderColor = LightGoldBorder,
-            focusedLabelColor = PrimaryGold,
-            unfocusedLabelColor = DarkCharcoal.copy(alpha = 0.7f),
+            focusedBorderColor = ViRedPrimary,
+            unfocusedBorderColor = BorderColor,
+            focusedLabelColor = ViRedPrimary,
+            unfocusedLabelColor = SecondaryText,
             focusedContainerColor = MaterialTheme.colorScheme.surface,
             unfocusedContainerColor = MaterialTheme.colorScheme.surface
         ),
+        shape = RoundedCornerShape(10.dp),
         modifier = modifier
             .fillMaxWidth()
             .clickable { datePickerDialog.show() }

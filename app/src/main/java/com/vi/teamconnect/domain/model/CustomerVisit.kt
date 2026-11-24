@@ -29,6 +29,7 @@ data class CustomerVisit(
     val prePost: String = "PREPAID", // PREPAID / POSTPAID
     val altNumber: String = "",
     val reasonForVisit: String = "",
+    val remarks: String = "",
     val gmb: String = "NO", // YES / NO
     val tagging: String = "NO", // YES / NO
 
@@ -49,7 +50,6 @@ data class CustomerVisit(
     val token: String get() = recordId.takeLast(8)
     val operator: String get() = "Vi"
     val gbp: String get() = gmb
-    val remarks: String get() = reasonForVisit
     val happyCalling: String get() = "N/A"
     val did: String get() = ""
     val refferel: String get() = ""

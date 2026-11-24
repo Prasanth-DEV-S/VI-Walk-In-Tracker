@@ -21,6 +21,7 @@ object ExportUtils {
         "PRE/POST",
         "ALT NUMBER",
         "REASON FOR VISIT",
+        "REMARKS",
         "GMB",
         "TAGGING"
     )
@@ -40,6 +41,7 @@ object ExportUtils {
                 escapeCsv(visit.prePost),
                 escapeCsv(visit.altNumber),
                 escapeCsv(visit.reasonForVisit),
+                escapeCsv(visit.remarks),
                 escapeCsv(visit.gmb),
                 escapeCsv(visit.tagging)
             )

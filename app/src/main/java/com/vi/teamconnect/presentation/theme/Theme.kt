@@ -9,25 +9,25 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 
-private val PremiumWhiteGoldColorScheme = lightColorScheme(
-    primary = PrimaryGold,
-    onPrimary = DarkCharcoal,
-    primaryContainer = SoftGoldHighlight,
-    onPrimaryContainer = DarkCharcoal,
-    secondary = DeepGold,
+private val ViBrandColorScheme = lightColorScheme(
+    primary = ViRedPrimary,
+    onPrimary = PrimaryBackground,
+    primaryContainer = ViLightRed,
+    onPrimaryContainer = ViDarkRed,
+    secondary = ViRedPrimary,
     onSecondary = PrimaryBackground,
-    secondaryContainer = LightGold,
-    onSecondaryContainer = DarkCharcoal,
-    tertiary = DeepGold,
-    onTertiary = PrimaryBackground,
+    secondaryContainer = ViLightYellow,
+    onSecondaryContainer = DarkText,
+    tertiary = ViYellowAccent,
+    onTertiary = DarkText,
     background = SecondaryBackground,
-    onBackground = DarkCharcoal,
+    onBackground = DarkText,
     surface = PrimaryBackground,
-    onSurface = DarkCharcoal,
-    surfaceVariant = SoftGoldHighlight,
-    onSurfaceVariant = DarkCharcoal,
-    outline = LightGoldBorder,
-    outlineVariant = LightGoldBorder
+    onSurface = DarkText,
+    surfaceVariant = ViLightYellow,
+    onSurfaceVariant = DarkText,
+    outline = BorderColor,
+    outlineVariant = BorderColor
 )
 
 @Composable
@@ -35,7 +35,7 @@ fun ViTeamConnectTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    val colorScheme = PremiumWhiteGoldColorScheme
+    val colorScheme = ViBrandColorScheme
     val view = LocalView.current
 
     if (!view.isInEditMode) {

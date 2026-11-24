@@ -23,7 +23,6 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -47,13 +46,11 @@ import com.vi.teamconnect.presentation.components.GoldCard
 import com.vi.teamconnect.presentation.components.GoldEditCustomerDialog
 import com.vi.teamconnect.presentation.components.StatusChip
 import com.vi.teamconnect.presentation.components.VIHeader
-import com.vi.teamconnect.presentation.theme.DarkCharcoal
-import com.vi.teamconnect.presentation.theme.DeepGold
-import com.vi.teamconnect.presentation.theme.GoldButtonGradient
-import com.vi.teamconnect.presentation.theme.LightGold
-import com.vi.teamconnect.presentation.theme.LightGoldBorder
-import com.vi.teamconnect.presentation.theme.PrimaryGold
-import com.vi.teamconnect.presentation.theme.SecondaryGrey
+import com.vi.teamconnect.presentation.theme.BorderColor
+import com.vi.teamconnect.presentation.theme.DarkText
+import com.vi.teamconnect.presentation.theme.SecondaryText
+import com.vi.teamconnect.presentation.theme.ViLightYellow
+import com.vi.teamconnect.presentation.theme.ViRedPrimary
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -82,27 +79,27 @@ fun HomeScreen(
     Scaffold(
         topBar = {
             VIHeader(
-                title = "Employee Dashboard"
+                title = "Dashboard"
             )
         },
         floatingActionButton = {
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(28.dp))
-                    .background(GoldButtonGradient)
+                    .background(ViRedPrimary)
                     .clickable { onNavigateToAddCustomer() }
                     .padding(horizontal = 20.dp, vertical = 14.dp)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = Icons.Default.Add,
-                        contentDescription = "Add Customer",
-                        tint = DarkCharcoal
+                        contentDescription = "Add Walk-in",
+                        tint = Color.White
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Add Customer",
-                        color = DarkCharcoal,
+                        text = "Add Walk-in",
+                        color = Color.White,
                         fontWeight = FontWeight.Bold,
                         fontSize = 15.sp
                     )
@@ -131,18 +128,18 @@ fun HomeScreen(
                                     text = "Welcome, ${uiState.currentUser?.employeeName?.ifEmpty { "Employee" } ?: "Employee"}",
                                     fontSize = 20.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = DarkCharcoal
+                                    color = DarkText
                                 )
                                 Text(
                                     text = "ID: ${uiState.currentUser?.employeeId?.ifEmpty { "N/A" } ?: "N/A"}",
                                     fontSize = 13.sp,
-                                    color = SecondaryGrey
+                                    color = SecondaryText
                                 )
                             }
                             Text(
                                 text = currentDateStr,
                                 fontSize = 12.sp,
-                                color = DeepGold,
+                                color = ViRedPrimary,
                                 fontWeight = FontWeight.SemiBold
                             )
                         }
@@ -153,21 +150,21 @@ fun HomeScreen(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .background(LightGold.copy(alpha = 0.3f), shape = RoundedCornerShape(8.dp))
-                                .border(1.dp, LightGoldBorder, shape = RoundedCornerShape(8.dp))
+                                .background(ViLightYellow, shape = RoundedCornerShape(8.dp))
+                                .border(1.dp, BorderColor, shape = RoundedCornerShape(8.dp))
                                 .padding(horizontal = 12.dp, vertical = 8.dp)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.LocationOn,
                                 contentDescription = "Branch",
-                                tint = DeepGold
+                                tint = ViRedPrimary
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = "Branch: ${uiState.currentUser?.branchName?.ifEmpty { "Main Branch" } ?: "Main Branch"}",
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.SemiBold,
-                                color = DarkCharcoal
+                                color = DarkText
                             )
                         }
                     }
@@ -206,9 +203,9 @@ fun HomeScreen(
                 ) {
                     Text(
                         text = "WALK-IN CUSTOMER DETAILS",
-                        fontSize = 16.sp,
+                        fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
-                        color = DarkCharcoal
+                        color = ViRedPrimary
                     )
                 }
             }
@@ -224,7 +221,7 @@ fun HomeScreen(
                     ) {
                         Text(
                             text = "No customer records found for this branch.",
-                            color = SecondaryGrey,
+                            color = SecondaryText,
                             fontSize = 14.sp
                         )
                     }
@@ -251,15 +248,15 @@ fun GoldStatSummaryCard(
 ) {
     Card(
         modifier = modifier
-            .border(1.dp, LightGoldBorder, RoundedCornerShape(12.dp)),
+            .border(1.dp, BorderColor, RoundedCornerShape(12.dp)),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(modifier = Modifier.padding(14.dp)) {
-            Text(text = title, fontSize = 12.sp, color = SecondaryGrey, fontWeight = FontWeight.Medium)
+            Text(text = title, fontSize = 12.sp, color = SecondaryText, fontWeight = FontWeight.Medium)
             Spacer(modifier = Modifier.height(4.dp))
-            Text(text = value, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = DeepGold)
+            Text(text = value, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = ViRedPrimary)
         }
     }
 }
@@ -282,12 +279,12 @@ fun EmployeeCustomerCard(
                         text = visit.customerName.ifEmpty { "Customer" },
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp,
-                        color = DarkCharcoal
+                        color = DarkText
                     )
                     Text(
                         text = "Mob: ${visit.mobileNumber}",
                         fontSize = 13.sp,
-                        color = SecondaryGrey
+                        color = SecondaryText
                     )
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -296,7 +293,7 @@ fun EmployeeCustomerCard(
                         Icon(
                             imageVector = Icons.Default.Edit,
                             contentDescription = "Edit Customer",
-                            tint = DeepGold
+                            tint = ViRedPrimary
                         )
                     }
                 }
@@ -308,10 +305,10 @@ fun EmployeeCustomerCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(text = "Date: ${visit.date}", fontSize = 12.sp, color = SecondaryGrey)
+                Text(text = "Date: ${visit.date}", fontSize = 12.sp, color = SecondaryText)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(text = "GMB: ${visit.gmb}", fontSize = 12.sp, color = DeepGold, fontWeight = FontWeight.SemiBold)
-                    Text(text = "Tagging: ${visit.tagging}", fontSize = 12.sp, color = DeepGold, fontWeight = FontWeight.SemiBold)
+                    Text(text = "GMB: ${visit.gmb}", fontSize = 12.sp, color = DarkText, fontWeight = FontWeight.SemiBold)
+                    Text(text = "Tagging: ${visit.tagging}", fontSize = 12.sp, color = DarkText, fontWeight = FontWeight.SemiBold)
                 }
             }
         }

@@ -306,7 +306,7 @@ class CustomerRepositoryImpl @Inject constructor(
 
             Result.success(recordId)
         } catch (e: Exception) {
-            Result.failure(Exception(e.localizedMessage ?: "Failed to add customer visit."))
+            Result.failure(Exception(e.localizedMessage ?: "Failed to Add Walk-in visit."))
         }
     }
 

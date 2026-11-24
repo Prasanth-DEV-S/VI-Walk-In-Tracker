@@ -21,6 +21,7 @@ import javax.inject.Inject
 data class EmployeeManagementUiState(
     val pendingEmployees: List<Employee> = emptyList(),
     val allEmployees: List<Employee> = emptyList(),
+    val currentUser: Employee? = null,
     val selectedTab: Int = 0, // 0: Pending Approvals, 1: All Employees
     val isLoading: Boolean = false,
     val message: String? = null,
@@ -45,11 +46,27 @@ class EmployeeManagementViewModel @Inject constructor(
     val uiState: StateFlow<EmployeeManagementUiState> = combine(
         employeeRepository.getPendingApprovalEmployees(),
         employeeRepository.getAllEmployees(),
+        authRepository.currentUserFlow,
         _selectedTab
-    ) { pending, all, tab ->
+    ) { pending, all, currentUser, tab ->
+        val isMasterAdmin = currentUser?.role == Role.MASTER_ADMIN
+
+        val filteredAll = if (isMasterAdmin) {
+            all
+        } else {
+            all.filter { it.role != Role.MASTER_ADMIN }
+        }
+
+        val filteredPending = if (isMasterAdmin) {
+            pending
+        } else {
+            pending.filter { it.role != Role.MASTER_ADMIN }
+        }
+
         EmployeeManagementUiState(
-            pendingEmployees = pending,
-            allEmployees = all,
+            pendingEmployees = filteredPending,
+            allEmployees = filteredAll,
+            currentUser = currentUser,
             selectedTab = tab
         )
     }.stateIn(

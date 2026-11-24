@@ -77,7 +77,7 @@ val bottomNavItems = listOf(
 @Composable
 fun MainAppNavigation(
     navController: NavHostController = rememberNavController(),
-    startDestination: String = Screen.Home.route,
+    startDestination: String = Screen.Login.route,
     mainViewModel: MainViewModel = hiltViewModel()
 ) {
     val currentUser by mainViewModel.currentUser.collectAsState()

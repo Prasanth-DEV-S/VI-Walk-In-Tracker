@@ -1,5 +1,6 @@
 package com.vi.teamconnect.presentation.auth
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -33,6 +35,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -40,16 +43,17 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.vi.teamconnect.R
 import com.vi.teamconnect.presentation.components.GoldGradientButton
 import com.vi.teamconnect.presentation.components.GoldOutlinedTextField
-import com.vi.teamconnect.presentation.theme.DarkCharcoal
-import com.vi.teamconnect.presentation.theme.DeepGold
-import com.vi.teamconnect.presentation.theme.LightGold
-import com.vi.teamconnect.presentation.theme.LightGoldBorder
+import com.vi.teamconnect.presentation.theme.BorderColor
+import com.vi.teamconnect.presentation.theme.DarkText
 import com.vi.teamconnect.presentation.theme.PrimaryBackground
-import com.vi.teamconnect.presentation.theme.PrimaryGold
 import com.vi.teamconnect.presentation.theme.SecondaryBackground
-import com.vi.teamconnect.presentation.theme.SecondaryGrey
+import com.vi.teamconnect.presentation.theme.SecondaryText
+import com.vi.teamconnect.presentation.theme.ViDarkRed
+import com.vi.teamconnect.presentation.theme.ViLightYellow
+import com.vi.teamconnect.presentation.theme.ViRedPrimary
 
 @Composable
 fun LoginScreen(
@@ -76,20 +80,29 @@ fun LoginScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.padding(24.dp)
         ) {
+            // VI Logo Header
+            Image(
+                painter = painterResource(id = R.drawable.logo),
+                contentDescription = "VI Logo",
+                modifier = Modifier
+                    .size(72.dp)
+                    .padding(bottom = 8.dp)
+            )
+
             Text(
                 text = "VI TEAM CONNECT",
-                fontSize = 28.sp,
+                fontSize = 26.sp,
                 fontWeight = FontWeight.ExtraBold,
-                color = DarkCharcoal,
+                color = ViRedPrimary,
                 letterSpacing = 1.sp
             )
 
             Text(
                 text = "Customer Visit & Management System",
-                fontSize = 14.sp,
-                color = DeepGold,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.padding(top = 4.dp, bottom = 28.dp)
+                fontSize = 13.sp,
+                color = SecondaryText,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.padding(top = 2.dp, bottom = 24.dp)
             )
 
             Card(
@@ -98,7 +111,7 @@ fun LoginScreen(
                 elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .border(width = 1.dp, color = LightGoldBorder, shape = RoundedCornerShape(20.dp))
+                    .border(width = 1.dp, color = BorderColor, shape = RoundedCornerShape(20.dp))
             ) {
                 Column(
                     modifier = Modifier.padding(24.dp),
@@ -108,7 +121,7 @@ fun LoginScreen(
                         text = "User Login",
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
-                        color = DarkCharcoal,
+                        color = DarkText,
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
 
@@ -120,7 +133,7 @@ fun LoginScreen(
                             Icon(
                                 imageVector = Icons.Default.Badge,
                                 contentDescription = null,
-                                tint = PrimaryGold
+                                tint = ViRedPrimary
                             )
                         }
                     )
@@ -131,13 +144,13 @@ fun LoginScreen(
                         value = uiState.password,
                         onValueChange = viewModel::onPasswordChanged,
                         label = { Text("Password") },
-                        leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = PrimaryGold) },
+                        leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = ViRedPrimary) },
                         trailingIcon = {
                             IconButton(onClick = viewModel::togglePasswordVisibility) {
                                 Icon(
                                     imageVector = if (uiState.isPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
                                     contentDescription = "Toggle Password",
-                                    tint = DeepGold
+                                    tint = ViRedPrimary
                                 )
                             }
                         },
@@ -145,8 +158,10 @@ fun LoginScreen(
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                         singleLine = true,
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = PrimaryGold,
-                            unfocusedBorderColor = LightGoldBorder
+                            focusedBorderColor = ViRedPrimary,
+                            unfocusedBorderColor = BorderColor,
+                            focusedLabelColor = ViRedPrimary,
+                            unfocusedLabelColor = SecondaryText
                         ),
                         shape = RoundedCornerShape(10.dp),
                         modifier = Modifier.fillMaxWidth()
@@ -157,7 +172,7 @@ fun LoginScreen(
                         horizontalArrangement = Arrangement.End
                     ) {
                         TextButton(onClick = onNavigateToForgotPassword) {
-                            Text("Forgot Password?", color = DeepGold, fontSize = 13.sp)
+                            Text("Forgot Password?", color = ViDarkRed, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
                         }
                     }
 
@@ -175,13 +190,13 @@ fun LoginScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(top = 12.dp)
-                                .background(LightGold.copy(alpha = 0.3f), shape = RoundedCornerShape(8.dp))
-                                .border(1.dp, LightGoldBorder, shape = RoundedCornerShape(8.dp))
+                                .background(ViLightYellow, shape = RoundedCornerShape(8.dp))
+                                .border(1.dp, BorderColor, shape = RoundedCornerShape(8.dp))
                                 .padding(12.dp)
                         ) {
                             Text(
                                 text = uiState.infoMessage!!,
-                                color = DarkCharcoal,
+                                color = DarkText,
                                 fontSize = 13.sp,
                                 textAlign = TextAlign.Center
                             )
@@ -203,9 +218,9 @@ fun LoginScreen(
                     Row(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("New Employee?", fontSize = 14.sp, color = SecondaryGrey)
+                        Text("New Employee?", fontSize = 14.sp, color = SecondaryText)
                         TextButton(onClick = onNavigateToRegister) {
-                            Text("Register Account", color = DarkCharcoal, fontWeight = FontWeight.Bold)
+                            Text("Register Account", color = ViRedPrimary, fontWeight = FontWeight.Bold)
                         }
                     }
                 }

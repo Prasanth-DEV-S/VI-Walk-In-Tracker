@@ -1,7 +1,6 @@
 package com.vi.teamconnect.presentation.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -21,10 +20,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.vi.teamconnect.presentation.theme.DarkCharcoal
-import com.vi.teamconnect.presentation.theme.LightGoldBorder
-import com.vi.teamconnect.presentation.theme.PrimaryBackground
-import com.vi.teamconnect.presentation.theme.PrimaryGold
+import com.vi.teamconnect.presentation.theme.BorderColor
+import com.vi.teamconnect.presentation.theme.ViRedPrimary
 
 @Composable
 fun VIHeader(
@@ -40,7 +37,7 @@ fun VIHeader(
                 val strokeWidth = 1.dp.toPx()
                 val y = size.height - strokeWidth / 2
                 drawLine(
-                    color = LightGoldBorder,
+                    color = BorderColor,
                     start = Offset(0f, y),
                     end = Offset(size.width, y),
                     strokeWidth = strokeWidth
@@ -61,13 +58,13 @@ fun VIHeader(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
-                            tint = PrimaryGold
+                            tint = ViRedPrimary
                         )
                     }
                 }
                 Text(
                     text = title,
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = ViRedPrimary,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(start = if (onBackClick == null) 12.dp else 4.dp)

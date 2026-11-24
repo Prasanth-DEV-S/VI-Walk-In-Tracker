@@ -1,6 +1,7 @@
 package com.vi.teamconnect.presentation.components
 
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -15,9 +16,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import com.vi.teamconnect.presentation.theme.DarkCharcoal
-import com.vi.teamconnect.presentation.theme.LightGoldBorder
-import com.vi.teamconnect.presentation.theme.PrimaryGold
+import androidx.compose.ui.unit.dp
+import com.vi.teamconnect.presentation.theme.BorderColor
+import com.vi.teamconnect.presentation.theme.DarkText
+import com.vi.teamconnect.presentation.theme.SecondaryText
+import com.vi.teamconnect.presentation.theme.ViRedPrimary
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,13 +49,14 @@ fun VIDropdownField(
             isError = isError,
             supportingText = if (isError && errorMessage != null) { { Text(errorMessage) } } else null,
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = PrimaryGold,
-                unfocusedBorderColor = LightGoldBorder,
-                focusedLabelColor = PrimaryGold,
-                unfocusedLabelColor = DarkCharcoal.copy(alpha = 0.7f),
+                focusedBorderColor = ViRedPrimary,
+                unfocusedBorderColor = BorderColor,
+                focusedLabelColor = ViRedPrimary,
+                unfocusedLabelColor = SecondaryText,
                 focusedContainerColor = MaterialTheme.colorScheme.surface,
                 unfocusedContainerColor = MaterialTheme.colorScheme.surface
             ),
+            shape = RoundedCornerShape(10.dp),
             modifier = Modifier
                 .menuAnchor()
                 .fillMaxWidth()
@@ -64,7 +68,7 @@ fun VIDropdownField(
         ) {
             options.forEach { option ->
                 DropdownMenuItem(
-                    text = { Text(option) },
+                    text = { Text(option, color = DarkText) },
                     onClick = {
                         onValueChange(option)
                         expanded = false

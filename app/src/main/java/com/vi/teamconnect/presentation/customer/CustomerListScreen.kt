@@ -109,12 +109,12 @@ fun CustomerListScreen(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = Icons.Default.Add,
-                        contentDescription = "Add Customer",
+                        contentDescription = "Add Walk-in",
                         tint = DarkCharcoal
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Add Customer",
+                        text = "Add Walk-in",
                         color = DarkCharcoal,
                         fontWeight = FontWeight.Bold,
                         fontSize = 15.sp

@@ -1,8 +1,6 @@
 package com.vi.teamconnect.presentation.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -21,7 +19,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.RadioButton
@@ -41,10 +38,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vi.teamconnect.domain.model.CustomerVisit
-import com.vi.teamconnect.presentation.theme.DarkCharcoal
-import com.vi.teamconnect.presentation.theme.GoldButtonGradient
-import com.vi.teamconnect.presentation.theme.LightGoldBorder
-import com.vi.teamconnect.presentation.theme.PrimaryGold
+import com.vi.teamconnect.presentation.theme.BorderColor
+import com.vi.teamconnect.presentation.theme.DarkText
+import com.vi.teamconnect.presentation.theme.SecondaryText
+import com.vi.teamconnect.presentation.theme.ViDarkRed
+import com.vi.teamconnect.presentation.theme.ViRedPrimary
 
 @Composable
 fun GoldGradientButton(
@@ -58,30 +56,26 @@ fun GoldGradientButton(
         onClick = onClick,
         enabled = enabled && !isLoading,
         colors = ButtonDefaults.buttonColors(
-            containerColor = Color.Transparent,
-            disabledContainerColor = Color.LightGray
+            containerColor = ViRedPrimary,
+            contentColor = Color.White,
+            disabledContainerColor = Color(0xFFE0E0E0),
+            disabledContentColor = Color.Gray
         ),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(10.dp),
         contentPadding = ButtonDefaults.ContentPadding,
         modifier = modifier
-            .background(
-                brush = if (enabled && !isLoading) GoldButtonGradient else ButtonDefaults.buttonColors().disabledContainerColor.run {
-                    androidx.compose.ui.graphics.SolidColor(Color(0xFFE0E0E0))
-                },
-                shape = RoundedCornerShape(12.dp)
-            )
     ) {
         if (isLoading) {
             CircularProgressIndicator(
                 modifier = Modifier.size(20.dp),
-                color = DarkCharcoal,
+                color = Color.White,
                 strokeWidth = 2.dp
             )
         } else {
             Text(
                 text = text,
-                color = DarkCharcoal,
-                fontSize = 16.sp,
+                color = Color.White,
+                fontSize = 15.sp,
                 fontWeight = FontWeight.Bold
             )
         }
@@ -108,12 +102,13 @@ fun GoldOutlinedTextField(
         supportingText = if (isError && errorMessage != null) { { Text(errorMessage) } } else null,
         trailingIcon = trailingIcon,
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = PrimaryGold,
-            unfocusedBorderColor = LightGoldBorder,
-            focusedLabelColor = PrimaryGold,
-            unfocusedLabelColor = DarkCharcoal.copy(alpha = 0.7f),
+            focusedBorderColor = ViRedPrimary,
+            unfocusedBorderColor = BorderColor,
+            focusedLabelColor = ViRedPrimary,
+            unfocusedLabelColor = SecondaryText,
             focusedContainerColor = MaterialTheme.colorScheme.surface,
-            unfocusedContainerColor = MaterialTheme.colorScheme.surface
+            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+            cursorColor = ViRedPrimary
         ),
         shape = RoundedCornerShape(10.dp),
         modifier = modifier.fillMaxWidth()
@@ -129,7 +124,7 @@ fun GoldCard(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .border(width = 1.dp, color = LightGoldBorder, shape = RoundedCornerShape(16.dp)),
+            .border(width = 1.dp, color = BorderColor, shape = RoundedCornerShape(16.dp)),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = elevation)
@@ -152,7 +147,8 @@ fun GoldEditCustomerDialog(
     var mobileNumber by remember { mutableStateOf(visit.mobileNumber) }
     var prePost by remember { mutableStateOf(if (visit.prePost.isNotBlank()) visit.prePost else "PREPAID") }
     var altNumber by remember { mutableStateOf(visit.altNumber) }
-    var reasonForVisit by remember { mutableStateOf(visit.reasonForVisit) }
+    var reasonForVisit by remember { mutableStateOf(if (visit.reasonForVisit.isNotBlank()) visit.reasonForVisit else "SIM Swap") }
+    var remarks by remember { mutableStateOf(visit.remarks) }
     var gmb by remember { mutableStateOf(visit.gmb) }
     var tagging by remember { mutableStateOf(visit.tagging) }
     var date by remember { mutableStateOf(visit.date) }
@@ -165,7 +161,7 @@ fun GoldEditCustomerDialog(
                 text = "Edit Customer Record",
                 fontWeight = FontWeight.Bold,
                 fontSize = 18.sp,
-                color = DarkCharcoal
+                color = ViRedPrimary
             )
         },
         text = {
@@ -215,23 +211,23 @@ fun GoldEditCustomerDialog(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                Text("PRE / POST *", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = DarkCharcoal)
+                Text("PRE / POST *", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = DarkText)
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     RadioButton(
                         selected = prePost.equals("PREPAID", ignoreCase = true),
                         onClick = { prePost = "PREPAID" },
-                        colors = RadioButtonDefaults.colors(selectedColor = PrimaryGold)
+                        colors = RadioButtonDefaults.colors(selectedColor = ViRedPrimary)
                     )
-                    Text("PREPAID", fontSize = 14.sp)
+                    Text("PREPAID", fontSize = 14.sp, color = DarkText)
 
                     Spacer(modifier = Modifier.width(16.dp))
 
                     RadioButton(
                         selected = prePost.equals("POSTPAID", ignoreCase = true),
                         onClick = { prePost = "POSTPAID" },
-                        colors = RadioButtonDefaults.colors(selectedColor = PrimaryGold)
+                        colors = RadioButtonDefaults.colors(selectedColor = ViRedPrimary)
                     )
-                    Text("POSTPAID", fontSize = 14.sp)
+                    Text("POSTPAID", fontSize = 14.sp, color = DarkText)
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -244,52 +240,61 @@ fun GoldEditCustomerDialog(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                GoldOutlinedTextField(
-                    value = reasonForVisit,
-                    onValueChange = { reasonForVisit = it },
-                    label = "Reason for Visit"
+                VIDropdownField(
+                    label = "Reason for Visit *",
+                    selectedValue = reasonForVisit,
+                    options = listOf("SIM Replacement", "SIM Swap", "Bill Payment", "New Connection", "MNP Port-in", "Plan Upgrade", "VAS Inquiry", "Other"),
+                    onValueChange = { reasonForVisit = it }
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                Text("GMB Status *", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = DarkCharcoal)
+                GoldOutlinedTextField(
+                    value = remarks,
+                    onValueChange = { remarks = it },
+                    label = "Remarks / Notes"
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text("GMB Status *", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = DarkText)
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     RadioButton(
                         selected = gmb.equals("YES", ignoreCase = true),
                         onClick = { gmb = "YES" },
-                        colors = RadioButtonDefaults.colors(selectedColor = PrimaryGold)
+                        colors = RadioButtonDefaults.colors(selectedColor = ViRedPrimary)
                     )
-                    Text("YES", fontSize = 14.sp)
+                    Text("YES", fontSize = 14.sp, color = DarkText)
 
                     Spacer(modifier = Modifier.width(16.dp))
 
                     RadioButton(
                         selected = gmb.equals("NO", ignoreCase = true),
                         onClick = { gmb = "NO" },
-                        colors = RadioButtonDefaults.colors(selectedColor = PrimaryGold)
+                        colors = RadioButtonDefaults.colors(selectedColor = ViRedPrimary)
                     )
-                    Text("NO", fontSize = 14.sp)
+                    Text("NO", fontSize = 14.sp, color = DarkText)
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                Text("Tagging Status *", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = DarkCharcoal)
+                Text("Tagging Status *", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = DarkText)
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     RadioButton(
                         selected = tagging.equals("YES", ignoreCase = true),
                         onClick = { tagging = "YES" },
-                        colors = RadioButtonDefaults.colors(selectedColor = PrimaryGold)
+                        colors = RadioButtonDefaults.colors(selectedColor = ViRedPrimary)
                     )
-                    Text("YES", fontSize = 14.sp)
+                    Text("YES", fontSize = 14.sp, color = DarkText)
 
                     Spacer(modifier = Modifier.width(16.dp))
 
                     RadioButton(
                         selected = tagging.equals("NO", ignoreCase = true),
                         onClick = { tagging = "NO" },
-                        colors = RadioButtonDefaults.colors(selectedColor = PrimaryGold)
+                        colors = RadioButtonDefaults.colors(selectedColor = ViRedPrimary)
                     )
-                    Text("NO", fontSize = 14.sp)
+                    Text("NO", fontSize = 14.sp, color = DarkText)
                 }
             }
         },
@@ -304,6 +309,7 @@ fun GoldEditCustomerDialog(
                         prePost = prePost,
                         altNumber = altNumber.trim(),
                         reasonForVisit = reasonForVisit.trim(),
+                        remarks = remarks.trim(),
                         gmb = gmb,
                         tagging = tagging,
                         date = date,
@@ -315,7 +321,7 @@ fun GoldEditCustomerDialog(
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel", color = DarkCharcoal)
+                Text("Cancel", color = ViDarkRed, fontWeight = FontWeight.SemiBold)
             }
         },
         containerColor = MaterialTheme.colorScheme.surface

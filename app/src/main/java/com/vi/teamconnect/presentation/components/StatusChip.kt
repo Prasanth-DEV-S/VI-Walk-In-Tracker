@@ -11,14 +11,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.vi.teamconnect.presentation.theme.DarkCharcoal
-import com.vi.teamconnect.presentation.theme.DeepGold
-import com.vi.teamconnect.presentation.theme.LightGold
-import com.vi.teamconnect.presentation.theme.LightGoldBorder
-import com.vi.teamconnect.presentation.theme.PrimaryGold
+import com.vi.teamconnect.presentation.theme.BorderColor
+import com.vi.teamconnect.presentation.theme.DarkText
 import com.vi.teamconnect.presentation.theme.StatusActiveGreen
-import com.vi.teamconnect.presentation.theme.StatusPendingAmber
+import com.vi.teamconnect.presentation.theme.StatusPendingYellow
 import com.vi.teamconnect.presentation.theme.StatusRejectedRed
+import com.vi.teamconnect.presentation.theme.StatusSuspendedDarkRed
+import com.vi.teamconnect.presentation.theme.ViLightRed
+import com.vi.teamconnect.presentation.theme.ViLightYellow
+import com.vi.teamconnect.presentation.theme.ViRedPrimary
 
 @Composable
 fun StatusChip(
@@ -27,13 +28,14 @@ fun StatusChip(
 ) {
     val (bgColor, textColor, borderColor) = when (text.trim().lowercase()) {
         "active" -> Triple(StatusActiveGreen.copy(alpha = 0.1f), StatusActiveGreen, StatusActiveGreen.copy(alpha = 0.3f))
-        "yes" -> Triple(LightGold.copy(alpha = 0.3f), DeepGold, LightGoldBorder)
-        "no" -> Triple(Color(0xFFF3F4F6), Color(0xFF6B7280), Color(0xFFE5E7EB))
-        "pending_approval", "pending" -> Triple(StatusPendingAmber.copy(alpha = 0.1f), StatusPendingAmber, StatusPendingAmber.copy(alpha = 0.3f))
-        "rejected", "suspended" -> Triple(StatusRejectedRed.copy(alpha = 0.1f), StatusRejectedRed, StatusRejectedRed.copy(alpha = 0.3f))
-        "prepaid", "pre" -> Triple(LightGold.copy(alpha = 0.25f), DeepGold, LightGoldBorder)
-        "postpaid", "pp" -> Triple(DarkCharcoal.copy(alpha = 0.08f), DarkCharcoal, LightGoldBorder)
-        else -> Triple(LightGold.copy(alpha = 0.15f), DarkCharcoal, LightGoldBorder)
+        "yes" -> Triple(ViLightYellow, Color(0xFFB78100), StatusPendingYellow)
+        "no" -> Triple(Color(0xFFF3F4F6), Color(0xFF6B7280), BorderColor)
+        "pending_approval", "pending" -> Triple(ViLightYellow, Color(0xFFB78100), StatusPendingYellow)
+        "rejected" -> Triple(ViLightRed, StatusRejectedRed, StatusRejectedRed.copy(alpha = 0.3f))
+        "suspended" -> Triple(ViLightRed, StatusSuspendedDarkRed, StatusSuspendedDarkRed.copy(alpha = 0.3f))
+        "prepaid", "pre" -> Triple(ViLightRed, ViRedPrimary, ViRedPrimary.copy(alpha = 0.3f))
+        "postpaid", "pp" -> Triple(Color(0xFFF0F0F0), DarkText, BorderColor)
+        else -> Triple(ViLightYellow, DarkText, BorderColor)
     }
 
     val label = when (text.uppercase()) {
