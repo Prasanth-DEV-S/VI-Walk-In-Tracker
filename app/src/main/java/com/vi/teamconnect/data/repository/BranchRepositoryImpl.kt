@@ -21,19 +21,67 @@ class BranchRepositoryImpl @Inject constructor(
     private val firestore: FirebaseFirestore
 ) : BranchRepository {
 
-    override fun getAllBranches(): Flow<List<Branch>> = callbackFlow {
-        val listener = firestore.collection("branches")
-            .whereEqualTo("isActive", true)
-            .addSnapshotListener { snapshot, _ ->
-                val list = snapshot?.documents?.mapNotNull { doc ->
-                    try {
-                        doc.toObject(BranchDto::class.java)?.toDomain()
-                    } catch (_: Exception) {
-                        null
-                    }
-                } ?: emptyList()
+    private val defaultBranchNames = listOf(
+        "AS TRADERS",
+        "GLOBAL COMMUNICATION",
+        "HITECH CONSULTANCY",
+        "SAS ENTERPRISES",
+        "KK NAGAR",
+        "SIA Hubify",
+        "SHREE CHAKRA AGENCY",
+        "SKM COMMUNICATION",
+        "SMS COMMUNICATION",
+        "SRI SAIRAM AENCY",
+        "VENKAT SAI AGENCIES",
+        "ATB Agency",
+        "P&C",
+        "Kalai Communication",
+        "Rajas"
+    )
 
-                trySend(list)
+    private val staticBranches = defaultBranchNames.mapIndexed { idx, name ->
+        Branch(
+            branchId = "BRANCH-${(idx + 1).toString().padStart(2, '0')}",
+            branchName = name,
+            branchCode = name.split(" ").mapNotNull { it.firstOrNull()?.uppercaseChar() }.joinToString("").take(4).ifEmpty { "BR${idx + 1}" }
+        )
+    }
+
+    override fun getAllBranches(): Flow<List<Branch>> = callbackFlow {
+        val listener = firestore.collection("app_settings")
+            .document("globle")
+            .addSnapshotListener { globleSnapshot, _ ->
+                val globleBranchStrings = (globleSnapshot?.get("branchName") as? List<*>)
+                    ?.mapNotNull { it as? String }
+                    ?: emptyList()
+
+                val globleBranches = globleBranchStrings.mapIndexed { idx, name ->
+                    Branch(
+                        branchId = "BRANCH-${(idx + 1).toString().padStart(2, '0')}",
+                        branchName = name,
+                        branchCode = name.split(" ").mapNotNull { it.firstOrNull()?.uppercaseChar() }.joinToString("").take(4).ifEmpty { "BR${idx + 1}" }
+                    )
+                }
+
+                firestore.collection("branches")
+                    .whereEqualTo("isActive", true)
+                    .get()
+                    .addOnSuccessListener { snapshot ->
+                        val firestoreList = snapshot?.documents?.mapNotNull { doc ->
+                            try {
+                                doc.toObject(BranchDto::class.java)?.toDomain()
+                            } catch (_: Exception) {
+                                null
+                            }
+                        } ?: emptyList()
+
+                        val combined = (firestoreList + globleBranches + staticBranches).distinctBy { it.branchName }
+                        trySend(combined)
+                    }
+                    .addOnFailureListener {
+                        val combined = (globleBranches + staticBranches).distinctBy { it.branchName }
+                        trySend(combined)
+                    }
             }
         awaitClose { listener.remove() }
     }

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -68,13 +69,15 @@ fun RegisterScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(SecondaryBackground),
-        contentAlignment = Alignment.Center
+            .background(SecondaryBackground)
+            .imePadding(),
+        contentAlignment = Alignment.TopCenter
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
-                .padding(24.dp)
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp, vertical = 16.dp)
                 .verticalScroll(rememberScrollState())
         ) {
             Image(
@@ -164,7 +167,7 @@ fun RegisterScreen(
                         GoldOutlinedTextField(
                             value = uiState.email,
                             onValueChange = viewModel::onEmailChanged,
-                            label = "Email Address (Optional)",
+                            label = "Email Address *",
                             trailingIcon = { Icon(Icons.Default.Email, contentDescription = null, tint = ViRedPrimary) }
                         )
 
@@ -174,6 +177,7 @@ fun RegisterScreen(
                             value = uiState.phoneNumber,
                             onValueChange = viewModel::onPhoneNumberChanged,
                             label = "Phone Number (10 digits) *",
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             trailingIcon = { Icon(Icons.Default.Phone, contentDescription = null, tint = ViRedPrimary) }
                         )
 
@@ -269,6 +273,7 @@ fun RegisterScreen(
                     }
                 }
             }
+            Spacer(modifier = Modifier.height(48.dp))
         }
     }
 }

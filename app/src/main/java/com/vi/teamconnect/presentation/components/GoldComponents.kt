@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -91,6 +92,8 @@ fun GoldOutlinedTextField(
     readOnly: Boolean = false,
     isError: Boolean = false,
     errorMessage: String? = null,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    singleLine: Boolean = true,
     trailingIcon: @Composable (() -> Unit)? = null
 ) {
     OutlinedTextField(
@@ -101,6 +104,8 @@ fun GoldOutlinedTextField(
         isError = isError,
         supportingText = if (isError && errorMessage != null) { { Text(errorMessage) } } else null,
         trailingIcon = trailingIcon,
+        keyboardOptions = keyboardOptions,
+        singleLine = singleLine,
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = ViRedPrimary,
             unfocusedBorderColor = BorderColor,

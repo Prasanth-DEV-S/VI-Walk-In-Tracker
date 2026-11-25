@@ -17,16 +17,35 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override fun getAppSettings(): Flow<AppSettings> = callbackFlow {
         val listener = firestore.collection("app_settings")
-            .document("dropdown_options")
-            .addSnapshotListener { snapshot, _ ->
-                val settings = snapshot?.toObject(AppSettings::class.java) ?: AppSettings()
-                trySend(settings)
+            .document("globle")
+            .addSnapshotListener { globleSnapshot, _ ->
+                val globleBranches = (globleSnapshot?.get("branchName") as? List<*>)
+                    ?.mapNotNull { it as? String }
+
+                firestore.collection("app_settings")
+                    .document("dropdown_options")
+                    .get()
+                    .addOnSuccessListener { dropdownSnapshot ->
+                        val baseSettings = dropdownSnapshot?.toObject(AppSettings::class.java) ?: AppSettings()
+                        val finalBranches = if (!globleBranches.isNullOrEmpty()) globleBranches else baseSettings.branchName
+                        trySend(baseSettings.copy(branchName = finalBranches))
+                    }
+                    .addOnFailureListener {
+                        val baseSettings = AppSettings()
+                        val finalBranches = if (!globleBranches.isNullOrEmpty()) globleBranches else baseSettings.branchName
+                        trySend(baseSettings.copy(branchName = finalBranches))
+                    }
             }
         awaitClose { listener.remove() }
     }
 
     override suspend fun updateAppSettings(settings: AppSettings): Result<Unit> {
         return try {
+            firestore.collection("app_settings")
+                .document("globle")
+                .set(mapOf("branchName" to settings.branchName))
+                .await()
+
             firestore.collection("app_settings")
                 .document("dropdown_options")
                 .set(settings)

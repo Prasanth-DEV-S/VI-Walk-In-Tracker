@@ -48,13 +48,20 @@ class RegisterViewModel @Inject constructor(
     private fun loadBranches() {
         viewModelScope.launch {
             branchRepository.getAllBranches().collect { branchList ->
+                val defaultNames = listOf(
+                    "AS TRADERS", "GLOBAL COMMUNICATION", "HITECH CONSULTANCY",
+                    "SAS ENTERPRISES", "KK NAGAR", "SIA Hubify", "SHREE CHAKRA AGENCY",
+                    "SKM COMMUNICATION", "SMS COMMUNICATION", "SRI SAIRAM AENCY",
+                    "VENKAT SAI AGENCIES", "ATB Agency", "P&C", "Kalai Communication", "Rajas"
+                )
                 val finalBranches = if (branchList.isEmpty()) {
-                    listOf(
-                        Branch("BRANCH-DEL-01", "Connaught Place Branch", "CP01"),
-                        Branch("BRANCH-MUM-01", "Andheri West Branch", "AW01"),
-                        Branch("BRANCH-BLR-01", "MG Road Branch", "MG01"),
-                        Branch("BRANCH-CHE-01", "Chennai Anna Nagar Branch", "AN01")
-                    )
+                    defaultNames.mapIndexed { idx, name ->
+                        Branch(
+                            branchId = "BRANCH-${(idx + 1).toString().padStart(2, '0')}",
+                            branchName = name,
+                            branchCode = name.take(4).uppercase()
+                        )
+                    }
                 } else {
                     branchList
                 }
@@ -67,7 +74,10 @@ class RegisterViewModel @Inject constructor(
     fun onEmailChanged(email: String) { _uiState.update { it.copy(email = email, errorMessage = null) } }
     fun onEmployeeIdChanged(id: String) { _uiState.update { it.copy(employeeId = id, errorMessage = null) } }
     fun onEmployeeNameChanged(name: String) { _uiState.update { it.copy(employeeName = name, errorMessage = null) } }
-    fun onPhoneNumberChanged(phone: String) { _uiState.update { it.copy(phoneNumber = phone, errorMessage = null) } }
+    fun onPhoneNumberChanged(phone: String) {
+        val digitsOnly = phone.filter { it.isDigit() }.take(10)
+        _uiState.update { it.copy(phoneNumber = digitsOnly, errorMessage = null) }
+    }
     fun onPasswordChanged(pwd: String) { _uiState.update { it.copy(password = pwd, errorMessage = null) } }
     fun onConfirmPasswordChanged(pwd: String) { _uiState.update { it.copy(confirmPassword = pwd, errorMessage = null) } }
     fun onBranchSelected(branch: Branch) { _uiState.update { it.copy(selectedBranch = branch, errorMessage = null) } }
@@ -76,7 +86,7 @@ class RegisterViewModel @Inject constructor(
     fun register() {
         val state = _uiState.value
         val cleanEmpId = state.employeeId.trim()
-        val cleanEmail = if (state.email.isNotBlank()) state.email.trim() else "${cleanEmpId.lowercase()}@viteamconnect.internal"
+        val cleanEmail = state.email.trim()
 
         if (cleanEmpId.isBlank()) {
             _uiState.update { it.copy(errorMessage = "Employee ID is required.") }
@@ -86,7 +96,15 @@ class RegisterViewModel @Inject constructor(
             _uiState.update { it.copy(errorMessage = "Full Name is required.") }
             return
         }
-        if (state.phoneNumber.isBlank() || state.phoneNumber.length < 10) {
+        if (cleanEmail.isBlank()) {
+            _uiState.update { it.copy(errorMessage = "Email Address is required.") }
+            return
+        }
+        if (!cleanEmail.contains("@")) {
+            _uiState.update { it.copy(errorMessage = "Please enter a valid Email Address.") }
+            return
+        }
+        if (state.phoneNumber.isBlank() || state.phoneNumber.length != 10) {
             _uiState.update { it.copy(errorMessage = "Please enter a valid 10-digit Phone Number.") }
             return
         }
